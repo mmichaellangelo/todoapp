@@ -1,0 +1,43 @@
+services:
+  api:
+    build:
+      context: ./backend_api/
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    volumes:
+      - ./backend_api/:/app/
+
+  db:
+    image: postgres
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mike
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - 8000:8080
+
+  frontend_web:
+    container_name: frontend_web
+    build:
+      context: ./frontend_web
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend_web:/app
+      - /app/node_modules
+    ports:
+      - 5173:5173
+
+volumes:
+  pgdata:
