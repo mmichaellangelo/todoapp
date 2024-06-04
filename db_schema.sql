@@ -1,15 +1,59 @@
-CREATE TABLE account (
+CREATE TABLE accounts (
     id SERIAL PRIMARY KEY,
-    username TEXT UNIQUE NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    date_created TIMESTAMPTZ NOT NULL,
-    date_edited TIMESTAMPTZ
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    date_edited TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE todo (
+CREATE TABLE permissions (
+    id SERIAL PRIMARY KEY
+);
+
+CREATE TABLE permissions_members (
+    permissions_id INT REFERENCES permissions(id) ON DELETE CASCADE,
+    account_id INT REFERENCES accounts(id) ON DELETE CASCADE,
+    PRIMARY KEY (permissions_id, account_id)
+);
+
+CREATE TABLE lists (
     id SERIAL PRIMARY KEY,
     title TEXT,
-    completed BOOLEAN,
-    account_id INT REFERENCES account(id)
+    description TEXT,
+    account_id INT NOT NULL REFERENCES accounts(id),
+    parent_list_id INT REFERENCES lists(id),
+    permissions_id INT REFERENCES permissions(id),
+    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    date_edited TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+CREATE TABLE todos (
+    id SERIAL PRIMARY KEY,
+    body TEXT,
+    list_id INT NOT NULL REFERENCES lists(id),
+    completed BOOLEAN NOT NULL,
+    account_id INT REFERENCES accounts(id),
+    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    date_edited TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    permissions_id INT REFERENCES permissions(id)
+);
+
+CREATE TABLE notes (
+    id SERIAL PRIMARY KEY,
+    title TEXT, 
+    body TEXT,
+    account_id INT NOT NULL REFERENCES accounts(id),
+    list_id INT NOT NULL REFERENCES lists(id),
+    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    date_edited TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    permissions_id INT REFERENCES permissions(id)
+);
+
+CREATE INDEX idx_account_username ON accounts(username);
+CREATE INDEX idx_account_email ON accounts(email);
+CREATE INDEX idx_list_account ON lists(account_id);
+CREATE INDEX idx_todo_list ON todos(list_id);
+CREATE INDEX idx_note_list ON notes(list_id);
+
+ 
