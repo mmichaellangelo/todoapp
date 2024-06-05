@@ -5,7 +5,7 @@
 
 <div class="todoitem_container">
     <input type="checkbox" bind:checked={data.completed}>
-    <h3 class={data.completed ? "completed" : ""}>{data.name}</h3>
+    <p class={data.completed ? "completed" : ""}>{data.name}</p>
 </div>
 
 <style>
@@ -13,9 +13,20 @@
     .todoitem_container {
         display: flex;
         flex-direction: row;
+        border: 1px solid darkgray;
+        border-radius: 0.5rem;
+        max-width: 300px;
+        align-items: center;
+        margin-bottom: 0.5rem;
     }
 
     .completed {
         text-decoration: line-through;
+    }
+
+    input {
+        margin: 1rem;
+        width: 1rem;
+        height: 1rem;
     }
 </style>

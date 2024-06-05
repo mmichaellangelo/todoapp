@@ -8,20 +8,32 @@ import (
 )
 
 var secretKey = []byte("secret key")
-var tokenExpirationLength = (time.Minute * 10)
+var accessTokenExpiration = (time.Minute * 10)
+var refreshTokenExpiration = (time.Hour * 24)
 
-func CreateToken(username string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+func GenerateLoginTokens(username string) (LoginTokens, error) {
+	accesstoken := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"username": username,
-			"exp":      time.Now().Add(tokenExpirationLength).Unix(),
+			"exp":      time.Now().Add(accessTokenExpiration).Unix(),
 		})
-	tokenString, err := token.SignedString(secretKey)
+	accesstokenstring, err := accesstoken.SignedString(secretKey)
 	if err != nil {
-		return "", err
+		return LoginTokens{}, err
 	}
 
-	return tokenString, nil
+	refreshtoken := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"username": username,
+			"exp":      time.Now().Add(refreshTokenExpiration).Unix(),
+		})
+	refreshtokenstring, err := refreshtoken.SignedString(secretKey)
+
+	if err != nil {
+		return LoginTokens{}, err
+	}
+
+	return LoginTokens{AccessToken: accesstokenstring, RefreshToken: refreshtokenstring}, nil
 }
 
 func VerifyToken(tokenString string) error {

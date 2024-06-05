@@ -18,13 +18,14 @@ func main() {
 		return
 	}
 
-	// Create Auth Handler
+	// Create handlers
 	authhandler := auth.NewAuthHandler(pool)
+	accounthandler := account.NewAccountHandler(pool)
 
 	// Initialize routes
 	mux := http.NewServeMux()
-	mux.Handle("/accounts/", account.NewAccountHandler(pool))
-	mux.Handle("/login/", login.NewLoginHandler(pool, authhandler))
+	mux.Handle("/accounts/", accounthandler)
+	mux.Handle("/login/", login.NewLoginHandler(pool, authhandler, accounthandler))
 
 	// Start server
 	err = http.ListenAndServe(":8080", mux)

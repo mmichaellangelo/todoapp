@@ -18,7 +18,7 @@ var (
 	AccountREWithUsername = regexp.MustCompile(`^\/accounts\/username\/[A-z0-9-_]+$`)
 )
 
-func NewAccountHandler(db *db.DBPool) http.Handler {
+func NewAccountHandler(db *db.DBPool) *AccountHandler {
 	return &AccountHandler{db: db}
 }
 
