@@ -2,6 +2,8 @@ package account
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/db"
 	"net/http"
@@ -26,8 +28,49 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch {
 	// Get all accounts
 	case r.Method == http.MethodGet && AccountRE.MatchString(r.URL.Path):
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		// MUST HAVE API KEY
+		accounts, err := h.GetAll()
+		if err != nil {
+			w.WriteHeader(500)
+			return
+		}
+		resp, err := json.Marshal(accounts)
+		if err != nil {
+			w.WriteHeader(500)
+			return
+		}
+		w.Write(resp)
+		return
 
+	case r.Method == http.MethodPost && AccountRE.MatchString(r.URL.Path):
+		fmt.Println("Create account")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+		r.ParseMultipartForm(0)
+		username := r.FormValue("username")
+		email := r.FormValue("email")
+		password := r.FormValue("password")
+
+		account, err := h.Create(username, email, password)
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Println("Error creating user: ", err)
+			return
+		}
+
+		resp, err := json.Marshal(account)
+		if err != nil {
+			w.WriteHeader(500)
+			return
+		}
+		w.Write(resp)
+		return
+
+	default:
+		return
 	}
+
 }
 
 // CREATE
