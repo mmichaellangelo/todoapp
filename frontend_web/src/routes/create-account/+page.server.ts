@@ -3,7 +3,7 @@ export function load() {
 }
 
 export const actions = {
-    default: async ({request, cookies}) => {
+    default: async ({request, fetch, cookies}) => {
         let formData;
         try {
             formData = await request.formData();

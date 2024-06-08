@@ -8,7 +8,8 @@ CREATE TABLE accounts (
 );
 
 CREATE TABLE permissions (
-    id SERIAL PRIMARY KEY
+    id SERIAL PRIMARY KEY,
+    name TEXT
 );
 
 CREATE TABLE permissions_members (
@@ -32,7 +33,7 @@ CREATE TABLE todos (
     id SERIAL PRIMARY KEY,
     body TEXT,
     list_id INT NOT NULL REFERENCES lists(id),
-    completed BOOLEAN NOT NULL,
+    completed BOOLEAN NOT NULL DEFAULT FALSE,
     account_id INT REFERENCES accounts(id),
     date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     date_edited TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,

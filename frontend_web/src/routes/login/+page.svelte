@@ -25,7 +25,7 @@
                     const username = result.data?.username as string;
                     Username.set(username);
                     setTimeout(() => {
-                        goto("/")
+                        goto("/dashboard")
                     }, 500)
                 } else {
                     loginError.error = true;

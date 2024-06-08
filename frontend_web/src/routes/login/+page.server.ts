@@ -23,14 +23,12 @@ export const load: PageServerLoad = async ({ cookies }) => {
             }   
             return;
         }
-        return redirect(302, "/");
-
     })   
 }
     
 
 export const actions = {
-    default: async ({cookies, request}) => {
+    default: async ({ fetch, cookies, request }) => {
         let formData;
         try {
             formData = await request.formData();
