@@ -3,4 +3,13 @@
     import "./global.css"
 </script>
 <Header/>
-<slot/>
+<div>
+    <slot/>
+</div>
+
+
+<style>
+    div {
+        padding: 1rem;
+    }
+</style>

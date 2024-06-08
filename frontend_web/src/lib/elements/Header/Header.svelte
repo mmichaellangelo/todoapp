@@ -1,8 +1,22 @@
+<script>
+    import { Username } from "$lib/state/userstore";
+
+</script>
 <div id="header_container">
-    <h1>ToDo</h1>
+    <a href="/" id="title_link">
+        <h1>ToDo</h1>
+    </a>
+    
     <div id="login_area_container">
-        <p>Logged in as <a href="#">MyKale</a></p>
+        {#if $Username == ""}
+            <a href="/login">Log in</a>
+            <span>or</span>
+            <a href="/create-account">Create an Account</a>
+        {:else}
+        <p>Logged in as {$Username}</p>
         <a href="#">Log Out</a>
+        {/if}
+        
     </div>
 </div>
 
@@ -11,7 +25,7 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        background-color: lightgray;
+        background-color: var(--col-grayblue);
         padding: 1rem;
     }
 
@@ -20,4 +34,18 @@
         margin-right: 2rem;
         text-align: right;
     }
+
+    a {
+        color: white;
+        text-decoration: underline;
+    }
+
+    #title_link {
+        text-decoration: none;
+    }
+
+    #title_link:hover {
+        color: white;
+    }
+
 </style>

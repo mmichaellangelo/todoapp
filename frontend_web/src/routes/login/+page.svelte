@@ -1,26 +1,37 @@
 <script lang="ts">
     import { enhance } from '$app/forms';
     import { goto } from '$app/navigation';
-    import { AccessToken } from '$lib/state/userstore';
+    import { AccessToken, Username } from '$lib/state/userstore';
     import type { SubmitFunction } from '@sveltejs/kit';
+    
     export let form;
 
     let awaitingResponse = false;
+    let loginError = {
+        error: false,
+        type: "",
+    }
 
     const handleEnhance: SubmitFunction = () => {
-        console.log("enhancement")
+        loginError.error = false;
         awaitingResponse = true;
         return async ({ result, update }) => {
             await update()
             awaitingResponse = false;
             if (result.type == 'success') {
-                const accesstoken = result.data?.accesstoken as string;
-                console.log("ACCESS TOKEN:", accesstoken)
-                AccessToken.set(accesstoken)
-                setTimeout(() => {
-                    goto("/")
-                }, 500)
-            } 
+                if (result.data?.success) {
+                    const accesstoken = result.data?.accesstoken as string;
+                    AccessToken.set(accesstoken);
+                    const username = result.data?.username as string;
+                    Username.set(username);
+                    setTimeout(() => {
+                        goto("/")
+                    }, 500)
+                } else {
+                    loginError.error = true;
+                    loginError.type = "Incorrect username/password"
+                }
+            }
         }
     }
 
@@ -31,11 +42,11 @@
     <form method="POST" use:enhance={handleEnhance}>
         <label>
             Username/Email:
-            <input type="text" name="emailorusername">
+            <input type="text" name="emailorusername" required>
         </label>
         <label>
             Password:
-            <input type="password" name="password">
+            <input type="password" name="password" required>
         </label>
         <div id="login_create_container">
             <button type="submit">Log In</button>
@@ -50,6 +61,10 @@
 
 {#if form?.success}
     <p>Login success! Redirecting...</p>
+{/if}
+
+{#if loginError.error}
+    <p>Error: {loginError.type}</p>
 {/if}
 
 <style>

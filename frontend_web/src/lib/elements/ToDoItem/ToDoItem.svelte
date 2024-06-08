@@ -18,6 +18,7 @@
         max-width: 300px;
         align-items: center;
         margin-bottom: 0.5rem;
+        background-color: var(--col-grayblue);
     }
 
     .completed {

@@ -1,5 +1,13 @@
 :root {
     font-family: Arial, Helvetica, sans-serif;
+
+    /* COLORS */
+    --col-red: #D7263D;
+    --col-darkblue: #02182B;
+    --col-blue: #0197F6;
+    --col-grayblue: #448FA3;
+    --col-lightblue: #68C5DB;
+    --col-white: #E1F0F4;
 }
 
 * {
@@ -8,5 +16,17 @@
 
 html, body {
     margin: 0px;
-    padding: 0px;
+    /* padding: 0px; */
+    background-color: var(--col-darkblue);
+    color: var(--col-white);
+}
+
+a {
+    color: var(--col-blue);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--col-lightblue);
+    text-decoration: underline;
 }
