@@ -16,7 +16,7 @@
         loginError.error = false;
         awaitingResponse = true;
         return async ({ result, update }) => {
-            await update()
+            await update();
             awaitingResponse = false;
             if (result.type == 'success') {
                 if (result.data?.success) {

@@ -68,8 +68,9 @@ export const actions = {
             username = data.username;
         })   
 
-        cookies.set("refreshtoken", refreshtoken, {path: "/", secure: true, httpOnly: true})
-        return {success: true, accesstoken: accesstoken, username: username}
+        cookies.set("refresh", refreshtoken, {path: "/", secure: true, httpOnly: true})
+        cookies.set("access", accesstoken, {path: "/", secure: true, httpOnly: true})
+        return {success: true, username: username}
 
     }
 } satisfies Actions;

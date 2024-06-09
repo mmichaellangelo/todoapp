@@ -3,10 +3,10 @@ package account
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/db"
 	"net/http"
+	"net/mail"
 	"regexp"
 )
 
@@ -25,6 +25,7 @@ func NewAccountHandler(db *db.DBPool) *AccountHandler {
 }
 
 func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	switch {
 	// Get all accounts
 	case r.Method == http.MethodGet && AccountRE.MatchString(r.URL.Path):
@@ -44,18 +45,28 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 
 	case r.Method == http.MethodPost && AccountRE.MatchString(r.URL.Path):
-		fmt.Println("Create account")
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-		r.ParseMultipartForm(0)
+		err := r.ParseMultipartForm(0)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+		}
 		username := r.FormValue("username")
 		email := r.FormValue("email")
 		password := r.FormValue("password")
 
-		account, err := h.Create(username, email, password)
+		if username == "" || email == "" || password == "" {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
+		validemail, err := mail.ParseAddress(email)
+
 		if err != nil {
-			w.WriteHeader(500)
-			fmt.Println("Error creating user: ", err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Invalid email address"))
+		}
+
+		account, err := h.Create(username, validemail.Address, password)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -91,13 +102,11 @@ func (h *AccountHandler) Create(username string, email string, password_plaintex
 	// prepare data to return
 	var account Account
 	defer rows.Close()
-	for rows.Next() {
-		err := rows.Scan(&account.ID, &account.Username, &account.Email, &account.PasswordHashed, &account.DateCreated, &account.DateEdited)
-		if err != nil {
-			return Account{}, err
-		}
+	rows.Next()
+	err = rows.Scan(&account.ID, &account.Username, &account.Email, &account.PasswordHashed, &account.DateCreated, &account.DateEdited)
+	if err != nil {
+		return Account{}, err
 	}
-
 	return account, nil
 }
 
