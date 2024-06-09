@@ -37,7 +37,7 @@ export const actions = {
             return {success: false}
         }
 
-        const response = await fetch("http://api:8080/login/", {
+        const response = await fetch("http://api/login/", {
             method: "POST",
             body: formData
         })
@@ -68,8 +68,8 @@ export const actions = {
             username = data.username;
         })   
 
-        cookies.set("refresh", refreshtoken, {path: "/", secure: true, httpOnly: true})
-        cookies.set("access", accesstoken, {path: "/", secure: true, httpOnly: true})
+        cookies.set("refresh", refreshtoken, {path: "/", secure: false, httpOnly: true})
+        cookies.set("access", accesstoken, {path: "/", secure: false, httpOnly: true})
         return {success: true, username: username}
 
     }

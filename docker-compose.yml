@@ -1,12 +1,29 @@
 services:
+  proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - 80:80
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - todo
+
   api:
     build:
       context: ./backend_api/
       dockerfile: Dockerfile
-    ports:
-      - 8080:8080
+    expose: 
+      - 80
     volumes:
       - ./backend_api/:/app/
+    depends_on:
+      - proxy
+      - db
+    environment:
+      VIRTUAL_HOST: api.dev.localhost
+      VIRTUAL_PORT: 80
+    networks:
+      - todo
 
   db:
     image: postgres
@@ -17,16 +34,31 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: db
       PGDATA: /var/lib/postgresql/data/pgdata
+      VIRTUAL_HOST: db.dev.localhost
+      VIRTUAL_PORT: 5432
+    expose:
+      - 5432
     volumes:
       - pgdata:/var/lib/postgresql/data
+    depends_on:
+      - proxy
+    networks:
+      - todo
 
   adminer:
     image: adminer
     restart: unless-stopped
     depends_on:
       - db
-    ports:
-      - 8000:8080
+      - proxy
+    expose: 
+      - 8080
+    environment:
+      VIRTUAL_HOST: adminer.dev.localhost
+      VIRTUAL_PORT: 8080
+    networks:
+      - todo
+    
 
   frontend_web:
     container_name: frontend_web
@@ -36,8 +68,19 @@ services:
     volumes:
       - ./frontend_web:/app
       - /app/node_modules
-    ports:
-      - 5173:5173
+    expose:
+      - 80
+    environment:
+      VIRTUAL_HOST: dev.localhost
+      VIRTUAL_PORT: 80
+    depends_on:
+      - api
+      - proxy
+    networks:
+      - todo
+
+networks:
+  todo:
 
 volumes:
   pgdata:

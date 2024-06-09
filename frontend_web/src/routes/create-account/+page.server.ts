@@ -13,7 +13,7 @@ export const actions = {
         }
 
 
-        const response = await fetch("http://api:8080/accounts/", {
+        const response = await fetch("http://api/accounts/", {
             method: "POST",
             body: formData
         })

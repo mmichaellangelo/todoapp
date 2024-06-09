@@ -32,7 +32,7 @@ func main() {
 	mux.Handle("/todos/", todohandler)
 
 	// Start server
-	err = http.ListenAndServe(":8080", mux)
+	err = http.ListenAndServe(":80", mux)
 	if err != nil {
 		fmt.Println("Error serving routes: ", err)
 	}
