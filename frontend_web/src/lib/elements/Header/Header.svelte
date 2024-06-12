@@ -14,7 +14,7 @@
             <a href="/create-account">Create an Account</a>
         {:else}
         <p>Logged in as {$Username}</p>
-        <a href="#">Log Out</a>
+        <a href="/logout" data-sveltekit-preload-data="off">Log Out</a>
         {/if}
         
     </div>
