@@ -2,8 +2,6 @@ package login
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"mykale/todobackendapi/account"
 	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/db"
@@ -28,24 +26,23 @@ func NewLoginHandler(db *db.DBPool, authhandler *auth.AuthHandler, accounthandle
 }
 
 func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	switch {
+	// login route
 	case r.Method == http.MethodPost && LoginRE.MatchString(r.URL.Path):
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		tokens, err := h.HandleLogin(r, ctx)
 		if err != nil {
-			w.WriteHeader(500)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
 			return
 		}
 
-		jsonAuthInfo, err := json.Marshal(tokens)
+		w.Header().Set("accesstoken", tokens.AccessToken)
+		w.Header().Set("refreshtoken", tokens.RefreshToken)
 
-		if err != nil {
-			fmt.Println("Error marshalling JSON:", err)
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(jsonAuthInfo)
+		w.Write([]byte("login success"))
 	}
 }
 

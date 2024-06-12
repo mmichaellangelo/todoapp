@@ -7,7 +7,7 @@ interface MyPayload extends JwtPayload {
     username: string;
 }
 
-export const load: PageServerLoad = async ({ cookies }) => {
+export const load: PageServerLoad = async ({ cookies, locals }) => {
 	// Check refresh token. If not expired, redirect to home
     const refresh = cookies.get("refreshtoken") as string;
     if (refresh == "") {
@@ -19,16 +19,23 @@ export const load: PageServerLoad = async ({ cookies }) => {
                 case "TokenExpiredError":
                     console.log("Token expired. Deleting.");
                     cookies.delete("refresh", {path: "/"});
-                    break;
+                    return { username: undefined }
             }   
-            return;
+            return { username: undefined }
         }
+        if (typeof decoded == 'object') {
+            console.log("DECODED USERNAME:", decoded.username)
+            return { username: undefined }
+        } else {
+            return { username: undefined }
+        }
+        
     })   
 }
     
 
 export const actions = {
-    default: async ({ fetch, cookies, request }) => {
+    default: async ({ fetch, request, cookies, locals }) => {
         let formData;
         try {
             formData = await request.formData();
@@ -39,18 +46,21 @@ export const actions = {
 
         const response = await fetch("http://api/login/", {
             method: "POST",
-            body: formData
+            body: formData,
         })
+
+
         if (!response.ok) {
             console.log("Error logging in:", response)
             return { success: false }
         }
+        
+        const accesstoken = response.headers.get("accesstoken")
+        const refreshtoken = response.headers.get("refreshtoken")
 
-        const responseJson = await response.json();
-        console.log(responseJson)
-        const accesstoken = responseJson.accesstoken as string;
-        const refreshtoken = responseJson.refreshtoken as string;
-
+        if (!accesstoken || !refreshtoken) {
+            return { success: false }
+        }
         if (accesstoken == "" || refreshtoken == "") {
             return { success: false }
         }
@@ -68,8 +78,9 @@ export const actions = {
             username = data.username;
         })   
 
-        cookies.set("refresh", refreshtoken, {path: "/", secure: false, httpOnly: true})
-        cookies.set("access", accesstoken, {path: "/", secure: false, httpOnly: true})
+        cookies.set("refreshtoken", refreshtoken, {path: "/", secure: true, httpOnly: true, sameSite: "lax"})
+        cookies.set("accesstoken", accesstoken, {path: "/", secure: true, httpOnly: true, sameSite: "lax"})
+        locals.username = username;
         return {success: true, username: username}
 
     }

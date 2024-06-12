@@ -1,5 +1,6 @@
 # ToDo
-<span style="color:red">WORK IN PROGRESS</span>
+> [!WARNING]
+> This is a work in progress. It most certainly is not fully functional.
 
 This is a simple but completely overengineered todo app.
 
@@ -10,3 +11,11 @@ The frontend web application is built with SvelteKit and the backend api is writ
 Postgres serves as the database with Adminer for database admin things.
 
 The whole stack is dockerized and can be run with docker compose.
+It is recommended to run with:
+> docker compose up --no-attach proxy
+
+to avoid a massive amount of logs from nginx.
+
+After starting, the webapp will be live at dev.localhost.
+
+Adminer can be accessed at adminer.localhost and the api is proxied at api.localhost.

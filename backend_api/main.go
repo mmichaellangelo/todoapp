@@ -21,7 +21,7 @@ func main() {
 
 	// Create handlers
 	authhandler := auth.NewAuthHandler(pool)
-	accounthandler := account.NewAccountHandler(pool)
+	accounthandler := account.NewAccountHandler(pool, authhandler)
 	todohandler := todo.NewTodoHandler(pool, authhandler, accounthandler)
 	loginhandler := login.NewLoginHandler(pool, authhandler, accounthandler)
 

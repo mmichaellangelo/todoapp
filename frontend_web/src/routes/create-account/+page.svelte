@@ -2,6 +2,7 @@
 
     import { enhance } from "$app/forms";
     import { goto } from "$app/navigation";
+    import { Username } from "$lib/state/userstore";
     import { error, type SubmitFunction } from '@sveltejs/kit';
 
     let awaitingResponse = false;
@@ -17,8 +18,9 @@
             if (result.type == "success") {
                 if (result.data?.success) {
                     success = true;
+                    Username.set(result.data.username)
                     setTimeout(() => {
-                        goto("/login")
+                        goto("/dashboard")
                     }, 1000)
                 }
                 if (!result.data?.success) {

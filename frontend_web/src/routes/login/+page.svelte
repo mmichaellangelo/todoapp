@@ -3,14 +3,21 @@
     import { goto } from '$app/navigation';
     import { AccessToken, Username } from '$lib/state/userstore';
     import type { SubmitFunction } from '@sveltejs/kit';
+    import { onMount } from 'svelte';
     
     export let form;
+
+    export let data
 
     let awaitingResponse = false;
     let loginError = {
         error: false,
         type: "",
     }
+    onMount(() => {
+        Username.set(data.username);
+    })
+    
 
     const handleEnhance: SubmitFunction = () => {
         loginError.error = false;

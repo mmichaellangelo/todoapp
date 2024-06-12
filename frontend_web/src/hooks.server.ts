@@ -1,12 +1,22 @@
-import type { HandleFetch } from "@sveltejs/kit";
+import { Username } from "$lib/state/userstore";
+import { getUsernameFromAccessToken } from "$lib/util/tokenValidation.server";
+import type { Handle } from "@sveltejs/kit";
 
-export const handleFetch: HandleFetch = async ({event, request, fetch}) => {
-    console.log("SERVER FETCH HANDLER RUN")
+export const handle: Handle = async ({ event, resolve }) => {
 
-    if (request.url.startsWith('http://api:8080/')) {
-        const cookie = event.request.headers.get('cookie') as string;
-        console.log("Including cookie:", cookie)
-        request.headers.set('cookie', cookie);
+    const accessCookie = event.cookies.get("accesstoken");
+    const refreshCookie = event.cookies.get("refreshtoken");
+
+    var username;
+    try {
+        username = getUsernameFromAccessToken(accessCookie as string);
+        event.locals.username = username;
+    } catch (err) {
+        console.log(err);
     }
-    return fetch(request);
+    
+    var response = await resolve(event);
+    response.headers.set("accesstoken", accessCookie as string);
+    response.headers.set("refreshtoken", refreshCookie as string);
+    return response;
 }

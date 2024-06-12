@@ -8,7 +8,7 @@
     </a>
     
     <div id="login_area_container">
-        {#if $Username == ""}
+        {#if $Username == ("" || undefined)}
             <a href="/login">Log in</a>
             <span>or</span>
             <a href="/create-account">Create an Account</a>

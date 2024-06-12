@@ -11,7 +11,8 @@ import (
 )
 
 type AccountHandler struct {
-	db *db.DBPool
+	db          *db.DBPool
+	authhandler *auth.AuthHandler
 }
 
 var (
@@ -20,17 +21,17 @@ var (
 	AccountREWithUsername = regexp.MustCompile(`^\/accounts\/username\/[A-z0-9-_]+$`)
 )
 
-func NewAccountHandler(db *db.DBPool) *AccountHandler {
-	return &AccountHandler{db: db}
+func NewAccountHandler(db *db.DBPool, authhandler *auth.AuthHandler) *AccountHandler {
+	return &AccountHandler{db: db, authhandler: authhandler}
 }
 
 func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	switch {
-	// Get all accounts
+	//---------------------------------------------------------------------- GET ALL ACCOUNTS
 	case r.Method == http.MethodGet && AccountRE.MatchString(r.URL.Path):
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		// MUST HAVE API KEY
+		// MUST HAVE API KEY ----------------------------------------------- ** TODO
 		accounts, err := h.GetAll()
 		if err != nil {
 			w.WriteHeader(500)
@@ -43,7 +44,7 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(resp)
 		return
-
+	// -------------------------------------------------------------------- CREATE ACCOUNT
 	case r.Method == http.MethodPost && AccountRE.MatchString(r.URL.Path):
 		err := r.ParseMultipartForm(0)
 		if err != nil {
@@ -75,6 +76,14 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(500)
 			return
 		}
+
+		tokens, err := h.authhandler.AuthenticateUser(account.Username, password, account.PasswordHashed)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		w.Header().Set("accesstoken", tokens.AccessToken)
+		w.Header().Set("refreshtoken", tokens.RefreshToken)
+
 		w.Write(resp)
 		return
 

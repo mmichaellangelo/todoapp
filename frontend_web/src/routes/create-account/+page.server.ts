@@ -1,6 +1,4 @@
-export function load() {
-
-}
+import { getUsernameFromAccessToken } from '$lib/util/tokenValidation.server.js';
 
 export const actions = {
     default: async ({request, fetch, cookies}) => {
@@ -23,7 +21,19 @@ export const actions = {
         }
         const responseJson = await response.json()
         console.log(responseJson)
-        return { success: true }
+
+        const accesstoken = response.headers.get("accesstoken")
+        const refreshtoken = response.headers.get("refreshtoken")
+
+        if ((!accesstoken || !refreshtoken) || (accesstoken == "" || refreshtoken == "")) {
+            return { success: false }
+        }
+        cookies.set("accesstoken", accesstoken, {path: "/", httpOnly: true})
+        cookies.set("refreshtoken", refreshtoken, {path: "/", httpOnly: true})
+
+        const username = getUsernameFromAccessToken(accesstoken)
+
+        return { success: true, username: username }
     }
 
 }
