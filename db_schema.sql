@@ -22,9 +22,9 @@ CREATE TABLE lists (
     id SERIAL PRIMARY KEY,
     title TEXT,
     description TEXT,
-    account_id INT NOT NULL REFERENCES accounts(id),
-    parent_list_id INT REFERENCES lists(id),
-    permissions_id INT REFERENCES permissions(id),
+    account_id INT NOT NULL REFERENCES accounts(id), -- on delete cascade
+    parent_list_id INT REFERENCES lists(id), -- on delete cascade
+    permissions_id INT REFERENCES permissions(id), -- on delete cascade
     date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     date_edited TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -34,7 +34,7 @@ CREATE TABLE todos (
     body TEXT,
     list_id INT NOT NULL REFERENCES lists(id),
     completed BOOLEAN NOT NULL DEFAULT FALSE,
-    account_id INT REFERENCES accounts(id),
+    account_id INT REFERENCES accounts(id), -- on delete cascade
     date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     date_edited TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     permissions_id INT REFERENCES permissions(id)
@@ -44,11 +44,11 @@ CREATE TABLE notes (
     id SERIAL PRIMARY KEY,
     title TEXT, 
     body TEXT,
-    account_id INT NOT NULL REFERENCES accounts(id),
-    list_id INT NOT NULL REFERENCES lists(id),
+    account_id INT NOT NULL REFERENCES accounts(id), -- on delete cascade
+    list_id INT NOT NULL REFERENCES lists(id), -- on delete cascade
     date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     date_edited TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    permissions_id INT REFERENCES permissions(id)
+    permissions_id INT REFERENCES permissions(id) -- on delete cascade
 );
 
 CREATE INDEX idx_account_username ON accounts(username);

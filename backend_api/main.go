@@ -7,6 +7,7 @@ import (
 	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/auth/login"
 	"mykale/todobackendapi/db"
+	"mykale/todobackendapi/list"
 	"mykale/todobackendapi/todo"
 	"net/http"
 )
@@ -23,6 +24,7 @@ func main() {
 	authhandler := auth.NewAuthHandler(pool)
 	accounthandler := account.NewAccountHandler(pool, authhandler)
 	todohandler := todo.NewTodoHandler(pool, authhandler, accounthandler)
+	listhandler := list.NewListHandler(pool, accounthandler, todohandler, authhandler)
 	loginhandler := login.NewLoginHandler(pool, authhandler, accounthandler)
 
 	// Initialize routes
@@ -30,6 +32,7 @@ func main() {
 	mux.Handle("/accounts/", accounthandler)
 	mux.Handle("/login/", loginhandler)
 	mux.Handle("/todos/", todohandler)
+	mux.Handle("/lists/", listhandler)
 
 	// Start server
 	err = http.ListenAndServe(":80", mux)
