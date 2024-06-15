@@ -66,7 +66,7 @@ export const actions = {
         }
         
         let username;
-        jwt.verify(accesstoken, "secret key", (err, decoded) => {
+        jwt.verify(accesstoken, "kinda secret key", (err, decoded) => {
             if (err) {
                 return { success: false };
             }

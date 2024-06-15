@@ -7,38 +7,67 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var secretKey = []byte("secret key")
-var accessTokenExpiration = (time.Minute * 10)
+var accessSecret = []byte("kinda secret key")
+var refreshSecret = []byte("secret key")
+var accessTokenExpiration = (time.Second * 10)
 var refreshTokenExpiration = (time.Hour * 24)
 
-func GenerateLoginTokens(username string) (LoginTokens, error) {
-	accesstoken := jwt.NewWithClaims(jwt.SigningMethodHS256,
-		jwt.MapClaims{
-			"username": username,
-			"exp":      time.Now().Add(accessTokenExpiration).Unix(),
-		})
-	accesstokenstring, err := accesstoken.SignedString(secretKey)
-	if err != nil {
-		return LoginTokens{}, err
-	}
-
-	refreshtoken := jwt.NewWithClaims(jwt.SigningMethodHS256,
-		jwt.MapClaims{
-			"username": username,
-			"exp":      time.Now().Add(refreshTokenExpiration).Unix(),
-		})
-	refreshtokenstring, err := refreshtoken.SignedString(secretKey)
-
-	if err != nil {
-		return LoginTokens{}, err
-	}
-
-	return LoginTokens{AccessToken: accesstokenstring, RefreshToken: refreshtokenstring}, nil
+type Claims struct {
+	Username string `json:"username"`
+	jwt.RegisteredClaims
 }
 
-func VerifyToken(tokenString string) error {
+func GenerateLoginTokens(username string) (LoginTokens, error) {
+	access, err := GenerateAccessToken(username)
+	if err != nil {
+		return LoginTokens{}, err
+	}
+
+	refresh, err := GenerateRefreshToken(username)
+	if err != nil {
+		return LoginTokens{}, err
+	}
+
+	return LoginTokens{AccessToken: access, RefreshToken: refresh}, nil
+}
+
+func GenerateAccessToken(username string) (string, error) {
+	accessClaims := &Claims{
+		Username: username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(accessTokenExpiration)),
+		},
+	}
+
+	accesstoken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	accesstokenstring, err := accesstoken.SignedString(accessSecret)
+	if err != nil {
+		return "", err
+	}
+
+	return accesstokenstring, nil
+}
+
+func GenerateRefreshToken(username string) (string, error) {
+	refreshClaims := &Claims{
+		Username: username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(refreshTokenExpiration)),
+		},
+	}
+
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	refreshtokenstring, err := refreshToken.SignedString(refreshSecret)
+	if err != nil {
+		return "", err
+	}
+
+	return refreshtokenstring, nil
+}
+
+func VerifyAccessToken(tokenString string) error {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
+		return accessSecret, nil
 	})
 
 	if err != nil {
@@ -50,4 +79,42 @@ func VerifyToken(tokenString string) error {
 	}
 
 	return nil
+}
+
+func VerifyRefreshToken(tokenString string) error {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return refreshSecret, nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if !token.Valid {
+		return fmt.Errorf("invalid token")
+	}
+
+	return nil
+}
+
+func RefreshAccess(refresh string) (string, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(refresh, claims, func(token *jwt.Token) (interface{}, error) {
+		return refreshSecret, nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	if !token.Valid {
+		return "", fmt.Errorf("invalid token")
+	}
+
+	newRefresh, err := GenerateRefreshToken(claims.Username)
+	if err != nil {
+		return "", err
+	}
+
+	return newRefresh, nil
 }

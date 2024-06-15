@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 export function getUsernameFromAccessToken(token: string): string {
-    const secretKey = "secret key"; // Should be in environment variable
+    const secretKey = "kinda secret key"; // Should be in environment variable
 
     try {
         const decoded = jwt.verify(token, secretKey) as jwt.JwtPayload;

@@ -2,6 +2,7 @@ package login
 
 import (
 	"context"
+	"fmt"
 	"mykale/todobackendapi/account"
 	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/db"
@@ -18,7 +19,8 @@ type LoginHandler struct {
 }
 
 var (
-	LoginRE = regexp.MustCompile(`^\/login\/$`)
+	LoginRE   = regexp.MustCompile(`^\/login\/$`)
+	RefreshRE = regexp.MustCompile(`^\/login\/refresh\/$`)
 )
 
 func NewLoginHandler(db *db.DBPool, authhandler *auth.AuthHandler, accounthandler *account.AccountHandler) http.Handler {
@@ -43,6 +45,21 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("refreshtoken", tokens.RefreshToken)
 
 		w.Write([]byte("login success"))
+
+	case r.Method == http.MethodPost && RefreshRE.MatchString(r.URL.Path):
+		fmt.Println("REFRESH")
+		refresh := r.Header.Get("refreshtoken")
+		if refresh == "" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		access, err := auth.RefreshAccess(refresh)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("accesstoken", access)
+		w.WriteHeader(http.StatusAccepted)
 	}
 }
 
