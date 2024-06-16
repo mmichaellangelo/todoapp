@@ -1,13 +1,15 @@
 <script lang="ts">
+    import { setContext, writable } from "svelte";
     import Header from "$lib/elements/Header/Header.svelte";
     import "./global.css"
-    import { Username } from "$lib/state/userstore";
-    import { onMount } from "svelte";
+        
     export let data;
 
-    onMount(() => { 
-        Username.set(data.username)
-    })
+    const username = writable<string | undefined>(data.username)
+
+    setContext("username", username)
+
+    
 
 </script>
 <Header/>

@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var accessSecret = []byte("kinda secret key")
+var accessSecret = []byte("secret key")
 var refreshSecret = []byte("secret key")
 var accessTokenExpiration = (time.Second * 10)
 var refreshTokenExpiration = (time.Hour * 24)

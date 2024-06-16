@@ -14,9 +14,9 @@
         error: false,
         type: "",
     }
-    onMount(() => {
-        Username.set(data.username);
-    })
+    // onMount(() => {
+    //     Username.set(data.username);
+    // })
     
 
     const handleEnhance: SubmitFunction = () => {

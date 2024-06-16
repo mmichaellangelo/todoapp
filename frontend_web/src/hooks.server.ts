@@ -2,6 +2,7 @@ import { getUsernameFromAccessToken } from "$lib/util/tokenValidation.server";
 import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
+    console.log("< RUN > Server handle hook")
 
     const accessCookie = event.cookies.get("accesstoken");
     const refreshCookie = event.cookies.get("refreshtoken");
@@ -38,6 +39,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             console.log(err)
         }
     }
+    
     
     var response = await resolve(event);
     response.headers.set("accesstoken", access);

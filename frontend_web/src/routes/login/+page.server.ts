@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
         }
         if (typeof decoded == 'object') {
             console.log("DECODED USERNAME:", decoded.username)
-            return { username: undefined }
+            return { username: decoded.username }
         } else {
             return { username: undefined }
         }
