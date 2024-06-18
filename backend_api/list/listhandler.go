@@ -8,6 +8,7 @@ import (
 	"mykale/todobackendapi/todo"
 	"net/http"
 	"time"
+	"regexp"
 )
 
 type ListHandler struct {
@@ -15,7 +16,8 @@ type ListHandler struct {
 	accounthandler *account.AccountHandler
 	todohandler    *todo.TodoHandler
 	authhandler    *auth.AuthHandler
-}
+} 
+
 
 type List struct {
 	ID             int64     `json:"id"`
@@ -28,15 +30,29 @@ type List struct {
 	Date_Edited    time.Time `json:"date_edited"`
 }
 
+var (
+	ListRE             = regexp.MustCompile(`^\/accounts\/(\d+)\/lists\/?$`)
+	ListREWithID       = regexp.MustCompile(`^\/accounts\/(\d+)\/lists\/(\d+)\/?$`)
+)
+
 func NewListHandler(db *db.DBPool, accounthandler *account.AccountHandler, todohandler *todo.TodoHandler, authhandler *auth.AuthHandler) *ListHandler {
 	return &ListHandler{db: db, accounthandler: accounthandler, todohandler: todohandler, authhandler: authhandler}
 }
 
 func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch {
-
+	// Get all lists
+	case r.Method == http.MethodGet && ListRE.MatchString(r.URL.Path):
+		h.handleLists(w, r)
 	}
 }
+
+
+func (h *ListHandler) handleLists (w http.ResponseWriter, r *http.Request) {
+
+}
+
+
 
 func (h *ListHandler) Create(title string, description string, account_id int64, parent_list_id int64, permissions_id int64) (List, error) {
 	// if -1 provided for permissions_id, create a new permission and use that
