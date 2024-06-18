@@ -17,6 +17,7 @@ export const handle: Handle = async ({ event, resolve }) => {
         event.locals.username = username;
     } catch (err) {
         try {
+            console.log("REFRESH")
             const res = await fetch("http://api/login/refresh/", {
                 method: "POST",
                 headers: {

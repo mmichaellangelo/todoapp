@@ -1,6 +1,8 @@
-<script>
+<script lang="ts">
     import { Username } from "$lib/state/userstore";
-
+    import { getContext } from "svelte";
+    import type { Writable } from "svelte/store";
+    
 </script>
 <div id="header_container">
     <a href="/" id="title_link">

@@ -111,10 +111,10 @@ func RefreshAccess(refresh string) (string, error) {
 		return "", fmt.Errorf("invalid token")
 	}
 
-	newRefresh, err := GenerateRefreshToken(claims.Username)
+	newAccess, err := GenerateAccessToken(claims.Username)
 	if err != nil {
 		return "", err
 	}
 
-	return newRefresh, nil
+	return newAccess, nil
 }
