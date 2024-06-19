@@ -10,11 +10,9 @@ The frontend web application is built with SvelteKit and the backend api is writ
 
 Postgres serves as the database with Adminer for database admin things.
 
-The whole stack is dockerized and can be run with docker compose.
-It is recommended to run with:
-> docker compose up --no-attach proxy
+The whole stack is dockerized.
 
-to avoid a massive amount of logs from nginx.
+**To start and stop the development server, run start.sh and stop.sh respectively.**
 
 After starting, the webapp will be live at dev.localhost.
 
