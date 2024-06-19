@@ -15,14 +15,8 @@ func NewAuthMiddleware(handlerToWrap http.Handler) *AuthMiddleware {
 }
 
 func (h *AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if isLoginPath(r.URL.Path) {
-
-	}
 	if isRestrictedPath(r.URL.Path) {
 		fmt.Println("RESTRICTED PATH")
-		if !h.isAllowed(w, r) {
-
-		}
 	}
 	h.handler.ServeHTTP(w, r)
 	fmt.Println("auth middleware")
@@ -46,6 +40,8 @@ func isLoginPath(path string) bool {
 	}
 }
 
-func (h *AuthMiddleware) isAllowed(w http.ResponseWriter, r *http.Request) bool {
-	return false
-}
+// Access Protected Resource
+// -- get user info from access token
+// -- get permission info from resource
+// -- cross-check permissions with user info
+// -- grant access or throw error

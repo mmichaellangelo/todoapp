@@ -1,5 +1,6 @@
 export interface iItem {
     title: string;
+    completed?: boolean;
 }
 
 export interface iList {

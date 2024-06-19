@@ -1,11 +1,20 @@
 <script lang="ts">
-    import type { ToDoItemData } from "./ToDoItem";
-    export let data: ToDoItemData;
+    import type { iItem } from "$lib/types";
+    export let data: iItem;
+    var isEditing = false;
 </script>
 
 <div class="todoitem_container">
-    <input type="checkbox" bind:checked={data.completed}>
-    <p class={data.completed ? "completed" : ""}>{data.name}</p>
+    <input type="checkbox" bind:checked={data.completed} tabindex="0">
+    {#if isEditing}
+        <!-- svelte-ignore a11y-autofocus 
+         it just works so why change it? -->
+        <input type="text" bind:value={data.title} class="item_edit_input" on:blur={() => {isEditing = false}} autofocus> 
+    {:else}
+        <!-- svelte-ignore a11y-no-noninteractive-tabindex 
+         again -- just works. why change it? -->
+        <p class={data.completed ? "completed" : ""} tabindex="0" on:focus={() => {isEditing = true}}>{data.title}</p>
+    {/if}
 </div>
 
 <style>
@@ -29,5 +38,9 @@
         margin: 1rem;
         width: 1rem;
         height: 1rem;
+    }
+
+    .item_edit_input {
+        width: fit-content;
     }
 </style>
