@@ -12,6 +12,14 @@
         imgsrc = images[Math.floor(Math.random()*images.length)]
         errormessage = errormessages[Math.floor(Math.random()*errormessages.length)]
     })
+
+    function isServerError(code: number): boolean {
+        if (code >= 500 && code < 600) {
+            return true
+        } else {
+            return false
+        }
+    }
     
  
 
@@ -21,7 +29,7 @@
         <h1>{errormessage ? errormessage : "..."}</h1>
         <h2>Error {$page.status}</h2>
         <p>{$page.error?.message}</p>
-        {#if (($page.status - 500) <= 100) }
+        {#if (isServerError($page.status)) }
             <p>server says sorry</p>
         {/if}
     </div>

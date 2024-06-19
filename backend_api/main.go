@@ -34,8 +34,10 @@ func main() {
 	mux.Handle("/login/", loginhandler)
 	mux.Handle("/accounts/", combinedhandler)
 
+	authMux := auth.NewAuthMiddleware(mux)
+
 	// Start server
-	err = http.ListenAndServe(":80", mux)
+	err = http.ListenAndServe(":80", authMux)
 	if err != nil {
 		fmt.Println("Error serving routes: ", err)
 	}

@@ -2,7 +2,6 @@
     import { setContext } from "svelte";
     import Header from "$lib/elements/Header/Header.svelte";
     import "./global.css"
-    import { writable } from "svelte/store";
     import { Username } from "$lib/state/userstore";
         
     export let data;

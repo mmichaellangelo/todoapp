@@ -3,11 +3,13 @@ package account
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/db"
 	"net/http"
 	"net/mail"
 	"regexp"
+	"strconv"
 )
 
 type AccountHandler struct {
@@ -16,9 +18,8 @@ type AccountHandler struct {
 }
 
 var (
-	AccountRE             = regexp.MustCompile(`^\/accounts\/$`)
-	AccountREWithID       = regexp.MustCompile(`^\/accounts\/id\/[0-9]+$`)
-	AccountREWithUsername = regexp.MustCompile(`^\/accounts\/username\/[A-z0-9-_]+$`)
+	AccountRE       = regexp.MustCompile(`^\/accounts\/$`)
+	AccountREWithID = regexp.MustCompile(`^\/accounts\/(\d+)\/?$`)
 )
 
 func NewAccountHandler(db *db.DBPool, authhandler *auth.AuthHandler) *AccountHandler {
@@ -28,10 +29,10 @@ func NewAccountHandler(db *db.DBPool, authhandler *auth.AuthHandler) *AccountHan
 func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	switch {
-	//---------------------------------------------------------------------- GET ALL ACCOUNTS
+	//----------------------------------- GET ALL ACCOUNTS
 	case r.Method == http.MethodGet && AccountRE.MatchString(r.URL.Path):
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		// MUST HAVE API KEY ----------------------------------------------- ** TODO
+		// MUST HAVE API KEY ----------- ** TODO
 		accounts, err := h.GetAll()
 		if err != nil {
 			w.WriteHeader(500)
@@ -44,7 +45,35 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(resp)
 		return
-	// -------------------------------------------------------------------- CREATE ACCOUNT
+		//----------------------------------- GET ACCOUNT BY ID
+	case r.Method == http.MethodGet && AccountREWithID.MatchString(r.URL.Path):
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		groups := AccountREWithID.FindStringSubmatch(r.URL.Path)
+		if len(groups) != 2 {
+			w.WriteHeader(400)
+			w.Write([]byte("invalid request"))
+			return
+		}
+		id, err := strconv.ParseInt(groups[1], 10, 64)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("error parsing integer"))
+			return
+		}
+		account, err := h.GetByID(id)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		resp, err := json.Marshal(account)
+		if err != nil {
+			w.WriteHeader(500)
+			return
+		}
+		w.Write(resp)
+		return
+	// ----------------------------- CREATE ACCOUNT
 	case r.Method == http.MethodPost && AccountRE.MatchString(r.URL.Path):
 		err := r.ParseMultipartForm(0)
 		if err != nil {
@@ -172,6 +201,9 @@ func (h *AccountHandler) GetByID(id int64) (Account, error) {
 		if err != nil {
 			return account, err
 		}
+	}
+	if account.ID == 0 {
+		return Account{}, fmt.Errorf("error finding account")
 	}
 
 	return account, nil

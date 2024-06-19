@@ -34,6 +34,8 @@ export const handle: Handle = async ({ event, resolve }) => {
             if (newAccess && typeof newAccess == 'string') {
                 access = newAccess;
                 event.cookies.set("accesstoken", access, {path: "/"})
+                username = getUsernameFromAccessToken(newAccess);
+                event.locals.username = username;
             }
             
         } catch (err) {
