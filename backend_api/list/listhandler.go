@@ -2,13 +2,16 @@ package list
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"mykale/todobackendapi/account"
 	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/db"
 	"mykale/todobackendapi/todo"
 	"net/http"
-	"time"
 	"regexp"
+	"strconv"
+	"time"
 )
 
 type ListHandler struct {
@@ -16,8 +19,7 @@ type ListHandler struct {
 	accounthandler *account.AccountHandler
 	todohandler    *todo.TodoHandler
 	authhandler    *auth.AuthHandler
-} 
-
+}
 
 type List struct {
 	ID             int64     `json:"id"`
@@ -30,9 +32,21 @@ type List struct {
 	Date_Edited    time.Time `json:"date_edited"`
 }
 
+type ListWithTodos struct {
+	ID             int64       `json:"id"`
+	Title          string      `json:"title"`
+	Description    string      `json:"description"`
+	Account_ID     int64       `json:"account_id"`
+	Parent_List_ID int64       `json:"parent_list_id"`
+	Permissions_ID int64       `json:"permissions_id"`
+	Date_Created   time.Time   `json:"date_created"`
+	Date_Edited    time.Time   `json:"date_edited"`
+	Todos          []todo.Todo `json:"todos"`
+}
+
 var (
-	ListRE             = regexp.MustCompile(`^\/accounts\/(\d+)\/lists\/?$`)
-	ListREWithID       = regexp.MustCompile(`^\/accounts\/(\d+)\/lists\/(\d+)\/?$`)
+	ListRE       = regexp.MustCompile(`^\/accounts\/(\d+)\/lists\/?$`)
+	ListREWithID = regexp.MustCompile(`^\/accounts\/(\d+)\/lists\/(\d+)\/?$`)
 )
 
 func NewListHandler(db *db.DBPool, accounthandler *account.AccountHandler, todohandler *todo.TodoHandler, authhandler *auth.AuthHandler) *ListHandler {
@@ -41,18 +55,80 @@ func NewListHandler(db *db.DBPool, accounthandler *account.AccountHandler, todoh
 
 func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch {
-	// Get all lists
+	// Get all lists by account id
 	case r.Method == http.MethodGet && ListRE.MatchString(r.URL.Path):
-		h.handleLists(w, r)
+		groups := ListRE.FindStringSubmatch(r.URL.Path)
+		if len(groups) != 2 {
+			w.WriteHeader(400)
+			w.Write([]byte("bad URL, error finding submatch"))
+			return
+		}
+		id, err := strconv.ParseInt(groups[1], 10, 64)
+		if err != nil {
+			w.WriteHeader(400)
+			w.Write([]byte("bad request"))
+		}
+		lists, err := h.GetAllByAccountID(id)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("error getting lists: " + err.Error()))
+			return
+		}
+		resjson, err := json.Marshal(lists)
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("errorrerrorerror"))
+			return
+		}
+		w.Write(resjson)
+		return
 	}
 }
 
+func (h *ListHandler) GetAllByAccountID(id int64) ([]ListWithTodos, error) {
+	rows, err := h.db.Pool.Query(context.Background(),
+		`SELECT id, title, description, account_id, parent_list_id, 
+	 	permissions_id, date_created, date_edited 
+	 	FROM lists
+	 	WHERE account_id=$1`, id)
 
-func (h *ListHandler) handleLists (w http.ResponseWriter, r *http.Request) {
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var lists []ListWithTodos
+	for rows.Next() {
+		var list ListWithTodos
+		var parentListID sql.NullInt64
+		var permissionsID sql.NullInt64
+		err := rows.Scan(&list.ID, &list.Title, &list.Description,
+			&list.Account_ID, &parentListID, &permissionsID,
+			&list.Date_Created, &list.Date_Edited)
+		if err != nil {
+			return nil, err
+		}
+		if parentListID.Valid {
+			list.Parent_List_ID = parentListID.Int64
+		} else {
+			list.Parent_List_ID = -1
+		}
 
+		if permissionsID.Valid {
+			list.Permissions_ID = permissionsID.Int64
+		} else {
+			list.Permissions_ID = -1
+		}
+		lists = append(lists, list)
+	}
+	for i, list := range lists {
+		todos, err := h.todohandler.GetAllByListID(list.ID)
+		if err != nil {
+			return nil, err
+		}
+		lists[i].Todos = todos
+	}
+	return lists, nil
 }
-
-
 
 func (h *ListHandler) Create(title string, description string, account_id int64, parent_list_id int64, permissions_id int64) (List, error) {
 	// if -1 provided for permissions_id, create a new permission and use that

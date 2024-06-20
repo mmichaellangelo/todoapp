@@ -2,6 +2,7 @@ package todo
 
 import (
 	"context"
+	"database/sql"
 	"mykale/todobackendapi/account"
 	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/db"
@@ -24,7 +25,7 @@ type Todo struct {
 	Account_ID     int64
 	Date_Created   time.Time
 	Date_Edited    time.Time
-	Permissions_ID int64
+	Permissions_ID sql.NullInt64
 }
 
 var (
@@ -96,6 +97,27 @@ func (h *TodoHandler) GetAllByAccountID(id int64) ([]Todo, error) {
 														account_id, date_created, date_edited, permissions_id 
 														FROM todos
 														WHERE id=$1`, id)
+	if err != nil {
+		return nil, err
+	}
+	var todolist []Todo
+	for rows.Next() {
+		var todo Todo
+		err := rows.Scan(&todo.ID, &todo.Body, &todo.List_ID,
+			&todo.Completed, &todo.Account_ID, &todo.Date_Created, &todo.Date_Edited, &todo.Permissions_ID)
+		if err != nil {
+			return nil, err
+		}
+		todolist = append(todolist, todo)
+	}
+	return todolist, nil
+}
+
+func (h *TodoHandler) GetAllByListID(list_id int64) ([]Todo, error) {
+	rows, err := h.db.Pool.Query(context.Background(), `SELECT id, body, list_id, completed, 
+														account_id, date_created, date_edited, permissions_id 
+														FROM todos
+														WHERE list_id=$1`, list_id)
 	if err != nil {
 		return nil, err
 	}

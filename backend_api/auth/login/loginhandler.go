@@ -30,7 +30,7 @@ func NewLoginHandler(db *db.DBPool, authhandler *auth.AuthHandler, accounthandle
 func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	switch {
-	// login route
+	// Login route
 	case r.Method == http.MethodPost && LoginRE.MatchString(r.URL.Path):
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
@@ -46,6 +46,7 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		w.Write([]byte("login success"))
 
+	// Refresh route
 	case r.Method == http.MethodPost && RefreshRE.MatchString(r.URL.Path):
 		fmt.Println("REFRESH")
 		refresh := r.Header.Get("refreshtoken")
@@ -82,7 +83,7 @@ func (h *LoginHandler) HandleLogin(r *http.Request, ctx context.Context) (auth.L
 		}
 	}
 
-	tokens, err := h.authhandler.AuthenticateUser(account.Username, passwordattempt, account.PasswordHashed)
+	tokens, err := h.authhandler.AuthenticateUser(account.ID, account.Username, passwordattempt, account.PasswordHashed)
 	if err != nil {
 		return auth.LoginTokens{}, err
 	}

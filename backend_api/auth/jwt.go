@@ -14,11 +14,12 @@ var refreshTokenExpiration = (time.Hour * 24)
 
 type Claims struct {
 	Username string `json:"username"`
+	UserID   int64  `json:"userid"`
 	jwt.RegisteredClaims
 }
 
-func GenerateLoginTokens(username string) (LoginTokens, error) {
-	access, err := GenerateAccessToken(username)
+func GenerateLoginTokens(username string, userid int64) (LoginTokens, error) {
+	access, err := GenerateAccessToken(username, userid)
 	if err != nil {
 		return LoginTokens{}, err
 	}
@@ -31,7 +32,7 @@ func GenerateLoginTokens(username string) (LoginTokens, error) {
 	return LoginTokens{AccessToken: access, RefreshToken: refresh}, nil
 }
 
-func GenerateAccessToken(username string) (string, error) {
+func GenerateAccessToken(username string, userid int64) (string, error) {
 	accessClaims := &Claims{
 		Username: username,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -111,7 +112,7 @@ func RefreshAccess(refresh string) (string, error) {
 		return "", fmt.Errorf("invalid token")
 	}
 
-	newAccess, err := GenerateAccessToken(claims.Username)
+	newAccess, err := GenerateAccessToken(claims.Username, claims.UserID)
 	if err != nil {
 		return "", err
 	}

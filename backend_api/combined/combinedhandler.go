@@ -1,6 +1,7 @@
 package combined
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
 )
@@ -23,8 +24,9 @@ func NewCombinedHandler(accounthandler, listhandler, todohandler http.Handler) *
 // ServeHTTP routes the requests to the appropriate sub-handler.
 func (h *CombinedHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
-
-	if match, _ := regexp.MatchString(`^/accounts/\d+/lists/`, path); match {
+	fmt.Println("combined handler")
+	if match, _ := regexp.MatchString(`^\/accounts\/\d+\/lists\/?$`, path); match {
+		fmt.Println("Lists!")
 		h.listhandler.ServeHTTP(w, r)
 	} else if match, _ := regexp.MatchString(`^/accounts/\d+/lists/\d+/todos`, path); match {
 		h.todohandler.ServeHTTP(w, r)

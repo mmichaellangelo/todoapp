@@ -10,7 +10,17 @@ import (
 	"net/mail"
 	"regexp"
 	"strconv"
+	"time"
 )
+
+type Account struct {
+	ID             int64     `json:"id"`
+	Username       string    `json:"username"`
+	Email          string    `json:"email"`
+	PasswordHashed string    `json:"password"`
+	DateCreated    time.Time `json:"date_created"`
+	DateEdited     time.Time `json:"date_edited"`
+}
 
 type AccountHandler struct {
 	db          *db.DBPool
@@ -106,7 +116,7 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		tokens, err := h.authhandler.AuthenticateUser(account.Username, password, account.PasswordHashed)
+		tokens, err := h.authhandler.AuthenticateUser(account.ID, account.Username, password, account.PasswordHashed)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
