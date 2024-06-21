@@ -1,9 +1,8 @@
 <script lang="ts">
     import { enhance } from '$app/forms';
     import { goto } from '$app/navigation';
-    import { AccessToken, Username } from '$lib/state/userstore';
+    import { Session } from '$lib/state/userstore';
     import type { SubmitFunction } from '@sveltejs/kit';
-    import { onMount } from 'svelte';
     
     export let form;
 
@@ -14,10 +13,6 @@
         error: false,
         type: "",
     }
-    // onMount(() => {
-    //     Username.set(data.username);
-    // })
-    
 
     const handleEnhance: SubmitFunction = () => {
         loginError.error = false;
@@ -27,10 +22,9 @@
             awaitingResponse = false;
             if (result.type == 'success') {
                 if (result.data?.success) {
-                    const accesstoken = result.data?.accesstoken as string;
-                    AccessToken.set(accesstoken);
                     const username = result.data?.username as string;
-                    Username.set(username);
+                    const userid = result.data?.userid as number;
+                    Session.set({ username, userid });
                     setTimeout(() => {
                         goto("/dashboard")
                     }, 500)

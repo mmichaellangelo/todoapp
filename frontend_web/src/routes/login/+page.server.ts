@@ -9,25 +9,25 @@ interface MyPayload extends JwtPayload {
 
 export const load: PageServerLoad = async ({ cookies, locals }) => {
 	// Check refresh token. If not expired, redirect to home
-    const refresh = cookies.get("refreshtoken") as string;
-    if (refresh == "") {
+    const access = cookies.get("accesstoken") as string;
+    if (access == "") {
         return;
     }
-    jwt.verify(refresh, "secret key", (err, decoded) => {
+    jwt.verify(access, "secret key", (err, decoded) => {
         if (err) {
             switch (err.name) {
                 case "TokenExpiredError":
                     console.log("Token expired. Deleting.");
                     cookies.delete("refresh", {path: "/"});
-                    return { username: undefined }
+                    return { username: undefined, userid: undefined }
             }   
-            return { username: undefined }
+            return { username: undefined, user_id: undefined}
         }
         if (typeof decoded == 'object') {
             console.log("DECODED USERNAME:", decoded.username)
-            return { username: decoded.username }
+            return { username: decoded.username, userid: decoded.userid }
         } else {
-            return { username: undefined }
+            return { username: undefined, user_id: undefined }
         }
         
     })   

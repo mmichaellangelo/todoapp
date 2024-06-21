@@ -1,4 +1,4 @@
-import { getUsernameFromAccessToken } from '$lib/util/tokenValidation.server.js';
+import { getSessionDataFromToken } from '$lib/util/tokenValidation.server.js';
 
 export const actions = {
     default: async ({request, fetch, cookies}) => {
@@ -31,9 +31,11 @@ export const actions = {
         cookies.set("accesstoken", accesstoken, {path: "/", httpOnly: true})
         cookies.set("refreshtoken", refreshtoken, {path: "/", httpOnly: true})
 
-        const username = getUsernameFromAccessToken(accesstoken)
+        const sessionData = getSessionDataFromToken(accesstoken)
+        const username = sessionData.username
+        const userid = sessionData.userid
 
-        return { success: true, username: username }
+        return { success: true, username: username, userid: userid}
     }
 
 }

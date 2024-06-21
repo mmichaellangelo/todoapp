@@ -24,7 +24,7 @@ func GenerateLoginTokens(username string, userid int64) (LoginTokens, error) {
 		return LoginTokens{}, err
 	}
 
-	refresh, err := GenerateRefreshToken(username)
+	refresh, err := GenerateRefreshToken(username, userid)
 	if err != nil {
 		return LoginTokens{}, err
 	}
@@ -35,6 +35,7 @@ func GenerateLoginTokens(username string, userid int64) (LoginTokens, error) {
 func GenerateAccessToken(username string, userid int64) (string, error) {
 	accessClaims := &Claims{
 		Username: username,
+		UserID:   userid,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(accessTokenExpiration)),
 		},
@@ -49,9 +50,10 @@ func GenerateAccessToken(username string, userid int64) (string, error) {
 	return accesstokenstring, nil
 }
 
-func GenerateRefreshToken(username string) (string, error) {
+func GenerateRefreshToken(username string, userid int64) (string, error) {
 	refreshClaims := &Claims{
 		Username: username,
+		UserID:   userid,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(refreshTokenExpiration)),
 		},

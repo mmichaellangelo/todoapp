@@ -20,3 +20,8 @@ export interface iList {
     date_edited: string;
     todos: iTodo[];
 }
+
+export interface SessionData {
+    userid: number;
+    username: string;
+}

@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 
-export function getUsernameFromAccessToken(token: string): string {
+import type { SessionData } from '$lib/types';
+
+export function getSessionDataFromToken(token: string): SessionData {
     const secretKey = "secret key"; // Should be in environment variable
 
     try {
@@ -11,13 +13,16 @@ export function getUsernameFromAccessToken(token: string): string {
         }
         
         const username = decoded.username;
+        const userid = decoded.userid as number;
         
         if (!username || typeof username !== 'string') {
             throw new Error('Username not found in token payload');
         }
 
-        console.log("Username: ", username);
-        return username;
+        if (!userid) {
+            throw new Error('User ID not found in token payload');
+        }
+        return {userid: userid, username: username};
     } catch (err) {
         console.error('Token verification failed:', err);
         throw err;

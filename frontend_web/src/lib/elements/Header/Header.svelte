@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Username } from "$lib/state/userstore";
+    import { Session } from "$lib/state/userstore";
     import { getContext } from "svelte";
     import type { Writable } from "svelte/store";
     
@@ -10,12 +10,12 @@
     </a>
     
     <div id="login_area_container">
-        {#if $Username == ("" || undefined)}
+        {#if $Session?.username == ("" || undefined)}
             <a href="/login">Log in</a>
             <span>or</span>
             <a href="/create-account">Create an Account</a>
         {:else}
-        <p>Logged in as {$Username}</p>
+        <p>Logged in as {$Session?.username}</p>
         <a href="/logout" data-sveltekit-preload-data="off">Log Out</a>
         {/if}
         

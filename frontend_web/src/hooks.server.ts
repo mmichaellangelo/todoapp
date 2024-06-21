@@ -1,4 +1,4 @@
-import { getUsernameFromAccessToken } from "$lib/util/tokenValidation.server";
+import { getSessionDataFromToken } from "$lib/util/tokenValidation.server";
 import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -9,12 +9,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     var access = accessCookie as string;
     var refresh = refreshCookie as string;
-
-
-    var username;
+    var sessionData;
+    
     try {
-        username = getUsernameFromAccessToken(access);
-        event.locals.username = username;
+        sessionData = getSessionDataFromToken(access);
+        event.locals.username = sessionData.username;
+        event.locals.userid = sessionData.userid;
     } catch (err) {
         try {
             console.log("REFRESH")
@@ -34,8 +34,9 @@ export const handle: Handle = async ({ event, resolve }) => {
             if (newAccess && typeof newAccess == 'string') {
                 access = newAccess;
                 event.cookies.set("accesstoken", access, {path: "/"})
-                username = getUsernameFromAccessToken(newAccess);
-                event.locals.username = username;
+                sessionData = getSessionDataFromToken(newAccess);
+                event.locals.username = sessionData.username;
+                event.locals.userid = sessionData.userid;
             }
             
         } catch (err) {
