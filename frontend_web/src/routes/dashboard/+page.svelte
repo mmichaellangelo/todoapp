@@ -5,6 +5,8 @@
 
 
 <h3>Lists</h3>
-{#each data.lists as list}
-    <List data={list}/>
-{/each}
+{#if data.lists}
+    {#each data.lists as list}
+        <List data={list}/>
+    {/each}
+{/if}

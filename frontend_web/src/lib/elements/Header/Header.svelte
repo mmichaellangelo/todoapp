@@ -5,7 +5,7 @@
     
 </script>
 <div id="header_container">
-    <a href="/" id="title_link">
+    <a href={$Session ? "/dashboard" : "/"} id="title_link">
         <h1>ToDo</h1>
     </a>
     

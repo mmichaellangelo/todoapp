@@ -2,8 +2,6 @@ import { getSessionDataFromToken } from "$lib/util/tokenValidation.server";
 import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
-    console.log("< RUN > Server handle hook")
-
     const accessCookie = event.cookies.get("accesstoken");
     const refreshCookie = event.cookies.get("refreshtoken");
 

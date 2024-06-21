@@ -5,5 +5,7 @@
 </script>
 <title>Todo Overview</title>
 <h2>Dashboard</h2>
-<ListExplorer data={data.lists} />
+{#if data.lists}
+    <ListExplorer data={data.lists} />
+{/if}
 <slot/>
