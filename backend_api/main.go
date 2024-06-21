@@ -21,12 +21,14 @@ func main() {
 		return
 	}
 
-	// Create handlers
+	// Main handlers
 	authhandler := auth.NewAuthHandler(pool)
 	accounthandler := account.NewAccountHandler(pool, authhandler)
 	todohandler := todo.NewTodoHandler(pool, authhandler, accounthandler)
 	listhandler := list.NewListHandler(pool, accounthandler, todohandler, authhandler)
 	loginhandler := login.NewLoginHandler(pool, authhandler, accounthandler)
+
+	// Combined handler delegates routes from /account/* to respective handlers
 	combinedhandler := combined.NewCombinedHandler(accounthandler, listhandler, todohandler)
 
 	// Initialize routes
@@ -34,7 +36,7 @@ func main() {
 	mux.Handle("/login/", loginhandler)
 	mux.Handle("/accounts/", combinedhandler)
 
-	// authMux := auth.NewAuthMiddleware(mux)
+	// ------------- TODO: Logging Middleware
 
 	// Start server
 	err = http.ListenAndServe(":80", mux)

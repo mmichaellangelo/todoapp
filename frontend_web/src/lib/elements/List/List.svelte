@@ -9,8 +9,8 @@
         <h3>{data.title}</h3>
         <p>{data.description}</p>
     </summary>
-    {#each data.items as item}
-        <ToDoItem data={item}/>
+    {#each data.todos as todo}
+        <ToDoItem data={todo}/>
     {/each}
 </details>
 

@@ -1,9 +1,7 @@
 <script lang="ts">
     import List from "$lib/elements/List/List.svelte";
     import type { iList } from "$lib/types";
-    export let data: {
-        lists: iList[]
-    }
+    export let data;
 </script>
 
 <h2>Dashboard</h2>

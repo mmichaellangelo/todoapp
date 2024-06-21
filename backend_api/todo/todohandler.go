@@ -18,14 +18,14 @@ type TodoHandler struct {
 }
 
 type Todo struct {
-	ID             int64
-	Body           string
-	List_ID        int64
-	Completed      bool
-	Account_ID     int64
-	Date_Created   time.Time
-	Date_Edited    time.Time
-	Permissions_ID sql.NullInt64
+	ID             int64         `json:"id"`
+	Body           string        `json:"body"`
+	List_ID        int64         `json:"list_id"`
+	Completed      bool          `json:"completed"`
+	Account_ID     int64         `json:"account_id"`
+	Date_Created   time.Time     `json:"date_created"`
+	Date_Edited    time.Time     `json:"date_edited"`
+	Permissions_ID sql.NullInt64 `json:"permissions_id"`
 }
 
 var (
@@ -52,6 +52,7 @@ func (h *TodoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// CREATE
 func (h *TodoHandler) Create(body string, list_id int64, account_id int64) (Todo, error) {
 	rows, err := h.db.Pool.Query(context.Background(),
 		`INSERT INTO todos (body, list_id, completed, account_id)
@@ -72,6 +73,7 @@ func (h *TodoHandler) Create(body string, list_id int64, account_id int64) (Todo
 	return todo, nil
 }
 
+// READ
 func (h *TodoHandler) GetAll() ([]Todo, error) {
 	rows, err := h.db.Pool.Query(context.Background(), `SELECT id, body, list_id, completed, 
 														account_id, date_created, date_edited, permissions_id 
@@ -111,6 +113,26 @@ func (h *TodoHandler) GetAllByAccountID(id int64) ([]Todo, error) {
 		todolist = append(todolist, todo)
 	}
 	return todolist, nil
+}
+
+func (h *TodoHandler) GetByID(id int64) (Todo, error) {
+	rows, err := h.db.Pool.Query(context.Background(), `SELECT id, body, list_id, completed, 
+														account_id, date_created, date_edited, permissions_id 
+														FROM todos
+														WHERE id=$1`, id)
+	if err != nil {
+		return Todo{}, err
+	}
+
+	var todo Todo
+	for rows.Next() {
+		err := rows.Scan(&todo.ID, &todo.Body, &todo.List_ID,
+			&todo.Completed, &todo.Account_ID, &todo.Date_Created, &todo.Date_Edited, &todo.Permissions_ID)
+		if err != nil {
+			return Todo{}, err
+		}
+	}
+	return todo, nil
 }
 
 func (h *TodoHandler) GetAllByListID(list_id int64) ([]Todo, error) {
@@ -156,24 +178,4 @@ func (h *TodoHandler) GetAllByEmail(email string) ([]Todo, error) {
 		return nil, err
 	}
 	return todos, nil
-}
-
-func (h *TodoHandler) GetByID(id int64) (Todo, error) {
-	rows, err := h.db.Pool.Query(context.Background(), `SELECT id, body, list_id, completed, 
-														account_id, date_created, date_edited, permissions_id 
-														FROM todos
-														WHERE id=$1`, id)
-	if err != nil {
-		return Todo{}, err
-	}
-
-	var todo Todo
-	for rows.Next() {
-		err := rows.Scan(&todo.ID, &todo.Body, &todo.List_ID,
-			&todo.Completed, &todo.Account_ID, &todo.Date_Created, &todo.Date_Edited, &todo.Permissions_ID)
-		if err != nil {
-			return Todo{}, err
-		}
-	}
-	return todo, nil
 }

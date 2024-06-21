@@ -32,10 +32,12 @@ var (
 	AccountREWithID = regexp.MustCompile(`^\/accounts\/(\d+)\/?$`)
 )
 
+// INSTANCE
 func NewAccountHandler(db *db.DBPool, authhandler *auth.AuthHandler) *AccountHandler {
 	return &AccountHandler{db: db, authhandler: authhandler}
 }
 
+// ROUTES
 func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	switch {
@@ -129,7 +131,6 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	default:
 		return
 	}
-
 }
 
 // CREATE

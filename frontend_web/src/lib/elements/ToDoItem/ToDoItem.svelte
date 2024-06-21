@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type { iItem } from "$lib/types";
-    export let data: iItem;
+    import type { iTodo } from "$lib/types";
+    export let data: iTodo;
     var isEditing = false;
 </script>
 
@@ -9,11 +9,12 @@
     {#if isEditing}
         <!-- svelte-ignore a11y-autofocus 
          it just works so why change it? -->
-        <input type="text" bind:value={data.title} class="item_edit_input" on:blur={() => {isEditing = false}} autofocus> 
+        <!-- <input type="text" bind:value={data.body} class="item_edit_input" on:blur={() => {isEditing = false}} autofocus>  -->
+         <div contenteditable="true" bind:innerText={data.body} class="item_edit_input" on:blur={() => {isEditing = false}} autofocus>{data.body}</div>
     {:else}
         <!-- svelte-ignore a11y-no-noninteractive-tabindex 
          again -- just works. why change it? -->
-        <p class={data.completed ? "completed" : ""} tabindex="0" on:focus={() => {isEditing = true}}>{data.title}</p>
+        <p class={data.completed ? "completed" : ""} tabindex="0" on:focus={() => {isEditing = true}}>{data.body}</p>
     {/if}
 </div>
 
@@ -42,5 +43,9 @@
 
     .item_edit_input {
         width: fit-content;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        margin-left: -0.5rem;
     }
 </style>
