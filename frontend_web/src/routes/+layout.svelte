@@ -5,9 +5,8 @@
     import { Session } from "$lib/state/userstore";
         
     export let data;
-    if (data.username && data.userid) {
-        Session.set({ username: data.username, userid: data.userid });
-    }
+    
+    $: Session.set(data.username ? { username: data.username, userid: data.userid } : undefined);
     
 
 </script>

@@ -1,16 +1,15 @@
 <script lang="ts">
     import { Session } from "$lib/state/userstore";
-    import { getContext } from "svelte";
-    import type { Writable } from "svelte/store";
     
 </script>
 <div id="header_container">
+    
     <a href={$Session ? "/dashboard" : "/"} id="title_link">
         <h1>ToDo</h1>
     </a>
     
     <div id="login_area_container">
-        {#if $Session?.username == ("" || undefined)}
+        {#if !$Session}
             <a href="/login">Log in</a>
             <span>or</span>
             <a href="/create-account">Create an Account</a>

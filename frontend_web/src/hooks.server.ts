@@ -8,39 +8,43 @@ export const handle: Handle = async ({ event, resolve }) => {
     var access = accessCookie as string;
     var refresh = refreshCookie as string;
     var sessionData;
-    
-    try {
-        sessionData = getSessionDataFromToken(access);
-        event.locals.username = sessionData.username;
-        event.locals.userid = sessionData.userid;
-    } catch (err) {
+
+    if (!access || access == "") {
+        event.locals.userid = undefined;
+        event.locals.username = undefined;
+    } else {
         try {
-            console.log("REFRESH")
-            const res = await fetch("http://api/login/refresh/", {
-                method: "POST",
-                headers: {
-                    "refreshtoken": refresh,
-                }
-            })
-            if (!res.ok) {
-                throw Error("unable to refresh")
-            }
-            
-            var newAccess = res.headers.get("accesstoken")
-            console.log(`NEW ACCESS: ${newAccess}`)
-            if (newAccess && typeof newAccess == 'string') {
-                access = newAccess;
-                event.cookies.set("accesstoken", access, {path: "/"})
-                sessionData = getSessionDataFromToken(newAccess);
-                event.locals.username = sessionData.username;
-                event.locals.userid = sessionData.userid;
-            }
-            
+            sessionData = getSessionDataFromToken(access);
+            event.locals.username = sessionData.username;
+            event.locals.userid = sessionData.userid;
         } catch (err) {
-            console.log(typeof err)
+            try {
+                console.log("REFRESH")
+                const res = await fetch("http://api/login/refresh/", {
+                    method: "POST",
+                    headers: {
+                        "refreshtoken": refresh,
+                    }
+                })
+                if (!res.ok) {
+                    throw Error("unable to refresh")
+                }
+                
+                var newAccess = res.headers.get("accesstoken")
+                console.log(`NEW ACCESS: ${newAccess}`)
+                if (newAccess && typeof newAccess == 'string') {
+                    access = newAccess;
+                    event.cookies.set("accesstoken", access, {path: "/"})
+                    sessionData = getSessionDataFromToken(newAccess);
+                    event.locals.username = sessionData.username;
+                    event.locals.userid = sessionData.userid;
+                }
+                
+            } catch (err) {
+                console.log(typeof err)
+            }
         }
     }
-    
     
     var response = await resolve(event);
     response.headers.set("accesstoken", access);

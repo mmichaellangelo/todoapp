@@ -22,6 +22,6 @@ export interface iList {
 }
 
 export interface SessionData {
-    userid: number;
-    username: string;
+    userid?: number;
+    username?: string;
 }
