@@ -10,15 +10,15 @@ export interface iTodo {
 }
 
 export interface iList {
-    id: number;
-    title: string;
-    description: string;
-    account_id: number;
-    parent_list_id: number;
-    permissions_id: number;
-    date_created: string;
-    date_edited: string;
-    todos: iTodo[];
+    id?: number;
+    title?: string;
+    description?: string;
+    account_id?: number;
+    parent_list_id?: number;
+    permissions_id?: number;
+    date_created?: string;
+    date_edited?: string;
+    todos?: iTodo[];
 }
 
 export interface SessionData {

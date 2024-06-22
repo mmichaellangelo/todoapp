@@ -2,12 +2,25 @@
     import type { iList } from "$lib/types";
     export let data: iList;
     import ToDoItem from "../ToDoItem/ToDoItem.svelte";
+
+    var titleCache = data.title || "";
+
+    function handleUpdateTitle(e: FocusEvent) {
+        console.log("blur")
+        e.relatedTarget
+        const element = e.target as HTMLElement;
+        const newTitle = element.innerText;
+        if (!(newTitle == titleCache)) {
+            
+        }
+    }
+
 </script>
 
 {#if data}
     <div class="list_container">
-            <h4>{data.title}</h4>
-            <p>{data.description}</p>
+        <h4 contenteditable="true" bind:innerText={data.title} on:blur={handleUpdateTitle}>Title</h4>
+        <p>{data.description || "description"}</p>
         {#if data.todos}
             {#each data.todos as todo}
                 <ToDoItem data={todo}/>
