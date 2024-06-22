@@ -23,8 +23,7 @@ export const handle: Handle = async ({ event, resolve }) => {
                 }
             })
             if (!res.ok) {
-                console.log("oops")
-                console.log(res)
+                throw Error("unable to refresh")
             }
             
             var newAccess = res.headers.get("accesstoken")
@@ -38,7 +37,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             }
             
         } catch (err) {
-            console.log(err)
+            console.log(typeof err)
         }
     }
     
