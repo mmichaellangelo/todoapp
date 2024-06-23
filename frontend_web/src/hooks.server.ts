@@ -19,7 +19,6 @@ export const handle: Handle = async ({ event, resolve }) => {
             event.locals.userid = sessionData.userid;
         } catch (err) {
             try {
-                console.log("REFRESH")
                 const res = await fetch("http://api/login/refresh/", {
                     method: "POST",
                     headers: {
@@ -31,7 +30,6 @@ export const handle: Handle = async ({ event, resolve }) => {
                 }
                 
                 var newAccess = res.headers.get("accesstoken")
-                console.log(`NEW ACCESS: ${newAccess}`)
                 if (newAccess && typeof newAccess == 'string') {
                     access = newAccess;
                     event.cookies.set("accesstoken", access, {path: "/"})
@@ -41,7 +39,7 @@ export const handle: Handle = async ({ event, resolve }) => {
                 }
                 
             } catch (err) {
-                console.log(typeof err)
+                console.log(err)
             }
         }
     }

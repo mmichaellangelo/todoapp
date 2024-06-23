@@ -19,7 +19,7 @@
 
 {#if data}
     <div class="list_container">
-        <h4 contenteditable="true" bind:innerText={data.title} on:blur={handleUpdateTitle}>Title</h4>
+        <input type="text" name="title" class="title_input" bind:value={data.title} on:blur={handleUpdateTitle} placeholder="Title">
         <p>{data.description || "description"}</p>
         {#if data.todos}
             {#each data.todos as todo}
@@ -35,15 +35,12 @@
     .list_container {
         border: 2px solid white;
         padding: 0.5rem;
-        border-radius: 0.2rem;
         margin-bottom: 0.5rem;
         background-color: var(--col-grayblue);
     }
 
-    h4 {
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
-        text-decoration: underline;
+    .title_input {
+        font-size: medium;
     }
 
     p {
@@ -52,4 +49,7 @@
         margin-top: 0.5rem;
         text-indent: 0.5rem;
     }
+
+    
+
 </style>
