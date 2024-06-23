@@ -1,7 +1,6 @@
 package combined
 
 import (
-	"fmt"
 	"net/http"
 	"regexp"
 )
@@ -11,6 +10,12 @@ type CombinedHandler struct {
 	listhandler    http.Handler
 	todohandler    http.Handler
 }
+
+var (
+	ListRE    = regexp.MustCompile(`^\/accounts\/\d+\/lists\/?(\d+\/?)?$`)
+	TodoRE    = regexp.MustCompile(`^\/accounts\/\d+\/lists\/\d+\/todos\/?(\d+\/?)?$`)
+	AccountRE = regexp.MustCompile(`^\/accounts\/?(\d+\/?)?$`)
+)
 
 // NewCombinedHandler creates a new CombinedHandler.
 func NewCombinedHandler(accounthandler, listhandler, todohandler http.Handler) *CombinedHandler {
@@ -25,15 +30,18 @@ func NewCombinedHandler(accounthandler, listhandler, todohandler http.Handler) *
 func (h *CombinedHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	switch {
-
-	}
-	fmt.Println("combined handler")
-	if match, _ := regexp.MatchString(`^\/accounts\/\d+\/lists\/?.*$`, path); match {
-		fmt.Println("Lists!")
+	// List Route
+	case ListRE.MatchString(path):
 		h.listhandler.ServeHTTP(w, r)
-	} else if match, _ := regexp.MatchString(`^/accounts/\d+/lists/\d+/todos`, path); match {
+		return
+	// Todo Route
+	case TodoRE.MatchString(path):
 		h.todohandler.ServeHTTP(w, r)
-	} else {
+		return
+	// Account Route
+	case AccountRE.MatchString(path):
 		h.accounthandler.ServeHTTP(w, r)
+		return
 	}
+
 }

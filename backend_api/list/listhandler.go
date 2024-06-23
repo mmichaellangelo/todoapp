@@ -86,23 +86,7 @@ func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Get list by account ID and list ID
 	case r.Method == http.MethodGet && ListREWithID.MatchString(r.URL.Path):
 		fmt.Println("List by ID Route")
-		groups := ListREWithID.FindStringSubmatch(r.URL.Path)
-		if len(groups) != 3 {
-			w.WriteHeader(500)
-			w.Write([]byte("invalid request"))
-		}
-
-		account_id, err := strconv.ParseInt(groups[1], 10, 64)
-		if err != nil {
-			w.WriteHeader(500)
-			w.Write([]byte("invalid account id"))
-		}
-
-		list_id, err := strconv.ParseInt(groups[2], 10, 64)
-		if err != nil {
-			w.WriteHeader(500)
-			w.Write([]byte("invalid list id"))
-		}
+		acc_id, list_id, err := parseURLWithAccountAndListID(r.URL.Path)
 		list, err := h.GetByListID(list_id)
 		if err != nil {
 			w.WriteHeader(500)
@@ -110,7 +94,7 @@ func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		// -------------- TODO :: Check Permissions!!
 		// right now only allow access to owner
-		if account_id != list.Account_ID {
+		if acc_id != list.Account_ID {
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte("unauthorized"))
 		}
@@ -121,10 +105,82 @@ func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("error marshalling json"))
 		}
 		w.Write(listJ)
+		return
 
+	// Create list route
+	case r.Method == http.MethodPost && ListRE.MatchString(r.URL.Path):
+		// acc_id, err := parseURLWithAccountID(r.URL.Path)
+		// if err != nil {
+		// 	w.WriteHeader(400)
+		// 	w.Write([]byte(err.Error()))
+		// }
+		// list, err := h.Create(acc_id)
 	}
 }
 
+// HELPERS
+func parseURLWithAccountAndListID(url string) (acc_id int64, list_id int64, err error) {
+	groups := ListREWithID.FindStringSubmatch(url)
+	if len(groups) != 3 {
+		return -1, -1, fmt.Errorf("invalid request")
+	}
+
+	acc_id, err = strconv.ParseInt(groups[1], 10, 64)
+	if err != nil {
+		return -1, -1, fmt.Errorf("invalid account id")
+	}
+
+	list_id, err = strconv.ParseInt(groups[2], 10, 64)
+	if err != nil {
+		return -1, -1, fmt.Errorf("invalid list id")
+	}
+
+	return acc_id, list_id, nil
+}
+
+func parseURLWithAccountID(url string) (acc_id int64, err error) {
+	groups := ListREWithID.FindStringSubmatch(url)
+	if len(groups) != 2 {
+		return -1, fmt.Errorf("invalid request")
+	}
+
+	acc_id, err = strconv.ParseInt(groups[1], 10, 64)
+	if err != nil {
+		return -1, fmt.Errorf("invalid account id")
+	}
+
+	return acc_id, nil
+}
+
+// CREATE
+func (h *ListHandler) Create(title string, description string, account_id int64, parent_list_id int64, permissions_id int64) (List, error) {
+	// if -1 provided for permissions_id, create a new permission and use that
+	if permissions_id == -1 {
+		permission, err := h.authhandler.CreatePermission("")
+		if err != nil {
+			return List{}, err
+		}
+		permissions_id = permission.ID
+	}
+
+	rows, err := h.db.Pool.Query(context.Background(),
+		`INSERT INTO lists (title, description, account_id, parent_list_id, permissions_id)
+		 VALUES ($1, $2, $3, $4, $5)
+		 RETURNING id, title, description, account_id, parent_list_id, permissions_id, date_created, date_edited`,
+		title, description, account_id, parent_list_id, permissions_id)
+	if err != nil {
+		return List{}, err
+	}
+	var list List
+	rows.Next()
+	err = rows.Scan(&list.Title, &list.Description, &list.Account_ID, &list.Parent_List_ID, &list.Permissions_ID, &list.Date_Created, &list.Date_Edited)
+	if err != nil {
+		return List{}, err
+	}
+	return list, nil
+}
+
+// READ
 func (h *ListHandler) GetAllByAccountID(id int64) ([]ListWithTodos, error) {
 	rows, err := h.db.Pool.Query(context.Background(),
 		`SELECT id, title, description, account_id, parent_list_id, 
@@ -209,31 +265,5 @@ func (h *ListHandler) GetByListID(id int64) (ListWithTodos, error) {
 	}
 	list.Todos = todos
 
-	return list, nil
-}
-func (h *ListHandler) Create(title string, description string, account_id int64, parent_list_id int64, permissions_id int64) (List, error) {
-	// if -1 provided for permissions_id, create a new permission and use that
-	if permissions_id == -1 {
-		permission, err := h.authhandler.CreatePermission("")
-		if err != nil {
-			return List{}, err
-		}
-		permissions_id = permission.ID
-	}
-
-	rows, err := h.db.Pool.Query(context.Background(),
-		`INSERT INTO lists (title, description, account_id, parent_list_id, permissions_id)
-		 VALUES ($1, $2, $3, $4, $5)
-		 RETURNING id, title, description, account_id, parent_list_id, permissions_id, date_created, date_edited`,
-		title, description, account_id, parent_list_id, permissions_id)
-	if err != nil {
-		return List{}, err
-	}
-	var list List
-	rows.Next()
-	err = rows.Scan(&list.Title, &list.Description, &list.Account_ID, &list.Parent_List_ID, &list.Permissions_ID, &list.Date_Created, &list.Date_Edited)
-	if err != nil {
-		return List{}, err
-	}
 	return list, nil
 }

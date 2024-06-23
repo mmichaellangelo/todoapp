@@ -36,11 +36,13 @@ func main() {
 	mux.Handle("/login/", loginhandler)
 	mux.Handle("/accounts/", combinedhandler)
 
-	// ------------- TODO: Logging Middleware
-
+	// Logger Middleware
+	LoggerMux := NewLoggerMiddleware(mux)
+	defer LoggerMux.Close()
 	// Start server
-	err = http.ListenAndServe(":80", mux)
+	err = http.ListenAndServe(":80", LoggerMux)
 	if err != nil {
 		fmt.Println("Error serving routes: ", err)
 	}
+
 }
