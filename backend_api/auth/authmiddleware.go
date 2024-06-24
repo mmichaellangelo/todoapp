@@ -2,23 +2,41 @@ package auth
 
 import (
 	"fmt"
+	"mykale/todobackendapi/account"
+	"mykale/todobackendapi/list"
+	"mykale/todobackendapi/todo"
 	"net/http"
 	"regexp"
 )
 
 type AuthMiddleware struct {
-	handler http.Handler
+	accounthandler *account.AccountHandler
+	listhandler    *list.ListHandler
+	todohandler    *todo.TodoHandler
+	next           http.Handler
 }
 
 func NewAuthMiddleware(handlerToWrap http.Handler) *AuthMiddleware {
-	return &AuthMiddleware{handler: handlerToWrap}
+	return &AuthMiddleware{next: handlerToWrap}
 }
 
 func (h *AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if isRestrictedPath(r.URL.Path) {
 		fmt.Println("RESTRICTED PATH")
+		accesstoken := r.Header.Get("accesstoken")
+		cookies := r.Cookies()
+		if cookies == nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		claims, err := GetClaimsFromToken(accesstoken)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		fmt.Printf("CLAIMS: Username: %v, UserID: %d\n", claims.Username, claims.UserID)
 	}
-	h.handler.ServeHTTP(w, r)
+	h.next.ServeHTTP(w, r)
 	fmt.Println("auth middleware")
 }
 

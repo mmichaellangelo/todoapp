@@ -50,6 +50,17 @@ func GenerateAccessToken(username string, userid int64) (string, error) {
 	return accesstokenstring, nil
 }
 
+func isTokenValid(token *jwt.Token) error {
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		if claims.ExpiresAt.Time.Before(time.Now()) {
+			return fmt.Errorf("token is expired")
+		}
+		return nil
+	} else {
+		return fmt.Errorf("invalid token")
+	}
+}
+
 func GenerateRefreshToken(username string, userid int64) (string, error) {
 	refreshClaims := &Claims{
 		Username: username,
@@ -77,8 +88,9 @@ func VerifyAccessToken(tokenString string) error {
 		return err
 	}
 
-	if !token.Valid {
-		return fmt.Errorf("invalid token")
+	err = isTokenValid(token)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -93,11 +105,29 @@ func VerifyRefreshToken(tokenString string) error {
 		return err
 	}
 
-	if !token.Valid {
-		return fmt.Errorf("invalid token")
+	err = isTokenValid(token)
+	if err != nil {
+		return err
 	}
 
 	return nil
+}
+
+func GetClaimsFromToken(tokenString string) (Claims, error) {
+	claims := Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, &claims, func(t *jwt.Token) (interface{}, error) {
+		return accessSecret, nil
+	})
+	if err != nil {
+		return Claims{}, err
+	}
+
+	err = isTokenValid(token)
+	if err != nil {
+		return Claims{}, err
+	}
+
+	return claims, nil
 }
 
 func RefreshAccess(refresh string) (string, error) {

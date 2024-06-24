@@ -6,6 +6,7 @@ import (
 	"mykale/todobackendapi/account"
 	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/auth/login"
+	"mykale/todobackendapi/auth/permission"
 	"mykale/todobackendapi/combined"
 	"mykale/todobackendapi/db"
 	"mykale/todobackendapi/list"
@@ -23,9 +24,10 @@ func main() {
 
 	// Main handlers
 	authhandler := auth.NewAuthHandler(pool)
-	accounthandler := account.NewAccountHandler(pool, authhandler)
-	todohandler := todo.NewTodoHandler(pool, authhandler, accounthandler)
-	listhandler := list.NewListHandler(pool, accounthandler, todohandler, authhandler)
+	permissionhandler := permission.NewPermissionHandler(pool)
+	accounthandler := account.NewAccountHandler(pool)
+	todohandler := todo.NewTodoHandler(pool, accounthandler)
+	listhandler := list.NewListHandler(pool, accounthandler, todohandler, permissionhandler)
 	loginhandler := login.NewLoginHandler(pool, authhandler, accounthandler)
 
 	// Combined handler delegates routes from /account/* to respective handlers
@@ -39,8 +41,12 @@ func main() {
 	// Logger Middleware
 	LoggerMux := NewLoggerMiddleware(mux)
 	defer LoggerMux.Close()
+
+	// Auth Middleware
+	AuthMux := auth.NewAuthMiddleware(LoggerMux)
+
 	// Start server
-	err = http.ListenAndServe(":80", LoggerMux)
+	err = http.ListenAndServe(":80", AuthMux)
 	if err != nil {
 		fmt.Println("Error serving routes: ", err)
 	}

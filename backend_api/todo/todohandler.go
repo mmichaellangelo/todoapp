@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"mykale/todobackendapi/account"
-	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/db"
 	"net/http"
 	"regexp"
@@ -13,7 +12,6 @@ import (
 
 type TodoHandler struct {
 	db             *db.DBPool
-	authhandler    *auth.AuthHandler
 	accounthandler *account.AccountHandler
 }
 
@@ -33,8 +31,8 @@ var (
 	TodoREWithID = regexp.MustCompile(`^\/todos\/id\/[0-9]+$`)
 )
 
-func NewTodoHandler(db *db.DBPool, authhandler *auth.AuthHandler, accounthandler *account.AccountHandler) *TodoHandler {
-	return &TodoHandler{db: db, authhandler: authhandler, accounthandler: accounthandler}
+func NewTodoHandler(db *db.DBPool, accounthandler *account.AccountHandler) *TodoHandler {
+	return &TodoHandler{db: db, accounthandler: accounthandler}
 }
 
 func (h *TodoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"mykale/todobackendapi/auth/password"
 	"mykale/todobackendapi/db"
 )
 
@@ -14,7 +15,7 @@ func NewAuthHandler(db *db.DBPool) *AuthHandler {
 }
 
 func (h *AuthHandler) AuthenticateUser(userid int64, username string, passwordattempt string, passwordhashed string) (LoginTokens, error) {
-	err := CheckPasswordHash(passwordattempt, passwordhashed)
+	err := password.CheckPasswordHash(passwordattempt, passwordhashed)
 	if err != nil {
 		return LoginTokens{}, fmt.Errorf("incorrect password")
 	}

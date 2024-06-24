@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"mykale/todobackendapi/auth"
+	"mykale/todobackendapi/auth/password"
 	"mykale/todobackendapi/db"
 	"net/http"
 	"net/mail"
@@ -23,8 +23,7 @@ type Account struct {
 }
 
 type AccountHandler struct {
-	db          *db.DBPool
-	authhandler *auth.AuthHandler
+	db *db.DBPool
 }
 
 var (
@@ -33,8 +32,8 @@ var (
 )
 
 // INSTANCE
-func NewAccountHandler(db *db.DBPool, authhandler *auth.AuthHandler) *AccountHandler {
-	return &AccountHandler{db: db, authhandler: authhandler}
+func NewAccountHandler(db *db.DBPool) *AccountHandler {
+	return &AccountHandler{db: db}
 }
 
 // ROUTES
@@ -118,13 +117,7 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		tokens, err := h.authhandler.AuthenticateUser(account.ID, account.Username, password, account.PasswordHashed)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		w.Header().Set("accesstoken", tokens.AccessToken)
-		w.Header().Set("refreshtoken", tokens.RefreshToken)
-
+		w.WriteHeader(http.StatusCreated)
 		w.Write(resp)
 		return
 
@@ -136,7 +129,7 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // CREATE
 func (h *AccountHandler) Create(username string, email string, password_plaintext string) (Account, error) {
 	// hash password
-	password_hashed, err := auth.HashPassword(password_plaintext)
+	password_hashed, err := password.HashPassword(password_plaintext)
 	if err != nil {
 		return Account{}, err
 	}
@@ -284,7 +277,7 @@ func (h *AccountHandler) UpdateEmail(id int64, newemail string) (Account, error)
 
 func (h *AccountHandler) UpdatePassword(id int64, newpassword_plaintext string) (Account, error) {
 	// hash password
-	newpassword_hashed, err := auth.HashPassword(newpassword_plaintext)
+	newpassword_hashed, err := password.HashPassword(newpassword_plaintext)
 	if err != nil {
 		return Account{}, err
 	}

@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"mykale/todobackendapi/account"
-	"mykale/todobackendapi/auth"
+	"mykale/todobackendapi/auth/permission"
 	"mykale/todobackendapi/db"
 	"mykale/todobackendapi/todo"
 	"net/http"
@@ -16,10 +16,10 @@ import (
 )
 
 type ListHandler struct {
-	db             *db.DBPool
-	accounthandler *account.AccountHandler
-	todohandler    *todo.TodoHandler
-	authhandler    *auth.AuthHandler
+	db                *db.DBPool
+	accounthandler    *account.AccountHandler
+	todohandler       *todo.TodoHandler
+	permissionhandler *permission.PermissionHandler
 }
 
 type List struct {
@@ -50,8 +50,8 @@ var (
 	ListREWithID = regexp.MustCompile(`^\/accounts\/(\d+)\/lists\/(\d+)\/?$`)
 )
 
-func NewListHandler(db *db.DBPool, accounthandler *account.AccountHandler, todohandler *todo.TodoHandler, authhandler *auth.AuthHandler) *ListHandler {
-	return &ListHandler{db: db, accounthandler: accounthandler, todohandler: todohandler, authhandler: authhandler}
+func NewListHandler(db *db.DBPool, accounthandler *account.AccountHandler, todohandler *todo.TodoHandler, permissionhandler *permission.PermissionHandler) *ListHandler {
+	return &ListHandler{db: db, accounthandler: accounthandler, todohandler: todohandler, permissionhandler: permissionhandler}
 }
 
 func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -156,7 +156,7 @@ func parseURLWithAccountID(url string) (acc_id int64, err error) {
 func (h *ListHandler) Create(title string, description string, account_id int64, parent_list_id int64, permissions_id int64) (List, error) {
 	// if -1 provided for permissions_id, create a new permission and use that
 	if permissions_id == -1 {
-		permission, err := h.authhandler.CreatePermission("")
+		permission, err := h.permissionhandler.CreatePermission("")
 		if err != nil {
 			return List{}, err
 		}

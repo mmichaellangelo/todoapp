@@ -1,5 +1,5 @@
 import { getSessionDataFromToken } from "$lib/util/tokenValidation.server";
-import type { Handle } from "@sveltejs/kit";
+import type { Handle, HandleFetch } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
     const accessCookie = event.cookies.get("accesstoken");
@@ -39,13 +39,23 @@ export const handle: Handle = async ({ event, resolve }) => {
                 }
                 
             } catch (err) {
-                console.log(err)
+                // console.log(err)
             }
         }
     }
-    
     var response = await resolve(event);
-    response.headers.set("accesstoken", access);
-    response.headers.set("refreshtoken", refresh);
+    response.headers.set("X-AccessToken", access);
+    response.headers.set("X-RefreshToken", refresh);
     return response;
+}
+
+export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
+    const accessCookie = event.cookies.get("accesstoken") as string;
+
+    console.log(`ACCESS: ${accessCookie}`)
+
+    if (request.url.startsWith("http://api/")) {
+        request.headers.set("accesstoken", accessCookie)
+    }
+    return fetch(request)
 }

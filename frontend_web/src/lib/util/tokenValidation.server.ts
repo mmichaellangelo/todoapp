@@ -24,7 +24,6 @@ export function getSessionDataFromToken(token: string): SessionData {
         }
         return {userid: userid, username: username};
     } catch (err) {
-        console.error('Token verification failed:', err);
         throw err;
     }
 }
