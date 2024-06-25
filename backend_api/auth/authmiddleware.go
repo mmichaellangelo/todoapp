@@ -1,19 +1,14 @@
 package auth
 
 import (
+	"context"
 	"fmt"
-	"mykale/todobackendapi/account"
-	"mykale/todobackendapi/list"
-	"mykale/todobackendapi/todo"
 	"net/http"
 	"regexp"
 )
 
 type AuthMiddleware struct {
-	accounthandler *account.AccountHandler
-	listhandler    *list.ListHandler
-	todohandler    *todo.TodoHandler
-	next           http.Handler
+	next http.Handler
 }
 
 func NewAuthMiddleware(handlerToWrap http.Handler) *AuthMiddleware {
@@ -24,17 +19,22 @@ func (h *AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if isRestrictedPath(r.URL.Path) {
 		fmt.Println("RESTRICTED PATH")
 		accesstoken := r.Header.Get("accesstoken")
-		cookies := r.Cookies()
-		if cookies == nil {
-			w.WriteHeader(http.StatusUnauthorized)
+		if accesstoken == "" {
+			http.Error(w, "missing access token", http.StatusUnauthorized)
 			return
 		}
+
 		claims, err := GetClaimsFromToken(accesstoken)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("invalid token: %v", err), http.StatusBadRequest)
 			return
 		}
+
 		fmt.Printf("CLAIMS: Username: %v, UserID: %d\n", claims.Username, claims.UserID)
+
+		// add claims to context
+		ctx := context.WithValue(r.Context(), "claims", claims)
+		r = r.WithContext(ctx)
 	}
 	h.next.ServeHTTP(w, r)
 	fmt.Println("auth middleware")
@@ -57,9 +57,3 @@ func isLoginPath(path string) bool {
 		return false
 	}
 }
-
-// Access Protected Resource
-// -- get user info from access token
-// -- get permission info from resource
-// -- cross-check permissions with user info
-// -- grant access or throw error

@@ -36,6 +36,7 @@ func main() {
 	// Initialize routes
 	mux := http.NewServeMux()
 	mux.Handle("/login/", loginhandler)
+	mux.Handle("/logout/", loginhandler)
 	mux.Handle("/accounts/", combinedhandler)
 
 	// Logger Middleware

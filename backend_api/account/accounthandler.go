@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/auth/password"
 	"mykale/todobackendapi/db"
 	"net/http"
@@ -39,6 +40,11 @@ func NewAccountHandler(db *db.DBPool) *AccountHandler {
 // ROUTES
 func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	claims, hasClaims := r.Context().Value("claims").(*auth.Claims)
+	if hasClaims {
+		fmt.Printf("Claims: %v\n", claims)
+	}
 	switch {
 	//----------------------------------- GET ALL ACCOUNTS
 	case r.Method == http.MethodGet && AccountRE.MatchString(r.URL.Path):

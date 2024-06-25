@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"mykale/todobackendapi/account"
+	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/auth/permission"
 	"mykale/todobackendapi/db"
 	"mykale/todobackendapi/todo"
@@ -55,9 +56,16 @@ func NewListHandler(db *db.DBPool, accounthandler *account.AccountHandler, todoh
 }
 
 func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	claims, hasClaims := r.Context().Value("claims").(*auth.Claims)
 	switch {
 	// Get all lists by account id
 	case r.Method == http.MethodGet && ListRE.MatchString(r.URL.Path):
+		// before doing anything else, make sure request has claims
+		if !hasClaims {
+			http.Error(w, fmt.Sprintf("must supply access token"), http.StatusUnauthorized)
+			return
+		}
+
 		groups := ListRE.FindStringSubmatch(r.URL.Path)
 		if len(groups) != 2 {
 			w.WriteHeader(400)
@@ -69,6 +77,12 @@ func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(400)
 			w.Write([]byte("bad request"))
 		}
+
+		if claims.UserID != id {
+			http.Error(w, "unauthorized request", http.StatusUnauthorized)
+			return
+		}
+
 		lists, err := h.GetAllByAccountID(id)
 		if err != nil {
 			w.WriteHeader(500)
