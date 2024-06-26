@@ -27,6 +27,7 @@ func (h *AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		claims, err := GetClaimsFromToken(accesstoken)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("invalid token: %v", err), http.StatusBadRequest)
+			fmt.Println("invalid token")
 			return
 		}
 
@@ -35,6 +36,12 @@ func (h *AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// add claims to context
 		ctx := context.WithValue(r.Context(), "claims", claims)
 		r = r.WithContext(ctx)
+
+		if ctxClaims, ok := r.Context().Value("claims").(*Claims); ok {
+			fmt.Printf("Context Claims in Middleware: Username: %v, UserID: %d\n", ctxClaims.Username, ctxClaims.UserID)
+		} else {
+			fmt.Println("Context claims not found in Middleware")
+		}
 	}
 	h.next.ServeHTTP(w, r)
 	fmt.Println("auth middleware")

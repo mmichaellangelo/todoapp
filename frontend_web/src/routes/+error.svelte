@@ -20,9 +20,6 @@
             return false
         }
     }
-    
- 
-
 </script>
 <div id="error_container">
     <div id="text_container">

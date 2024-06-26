@@ -57,12 +57,14 @@ func NewListHandler(db *db.DBPool, accounthandler *account.AccountHandler, todoh
 
 func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	claims, hasClaims := r.Context().Value("claims").(*auth.Claims)
+	fmt.Println(claims)
 	switch {
 	// Get all lists by account id
 	case r.Method == http.MethodGet && ListRE.MatchString(r.URL.Path):
 		// before doing anything else, make sure request has claims
 		if !hasClaims {
-			http.Error(w, fmt.Sprintf("must supply access token"), http.StatusUnauthorized)
+			http.Error(w, "must supply access token", http.StatusUnauthorized)
+			fmt.Println("no claims")
 			return
 		}
 
@@ -101,6 +103,9 @@ func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case r.Method == http.MethodGet && ListREWithID.MatchString(r.URL.Path):
 		fmt.Println("List by ID Route")
 		acc_id, list_id, err := parseURLWithAccountAndListID(r.URL.Path)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("could not parse url: %v", err), http.StatusBadRequest)
+		}
 		list, err := h.GetByListID(list_id)
 		if err != nil {
 			w.WriteHeader(500)

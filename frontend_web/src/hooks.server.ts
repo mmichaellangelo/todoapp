@@ -1,5 +1,5 @@
 import { getSessionDataFromToken } from "$lib/util/tokenValidation.server";
-import type { Handle, HandleFetch } from "@sveltejs/kit";
+import { error, type Handle, type HandleFetch, type HandleServerError } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
     const accessCookie = event.cookies.get("accesstoken");
@@ -59,3 +59,11 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
     }
     return fetch(request)
 }
+
+// export const handleError: HandleServerError = async ({error, event, status, message}) => {
+//     console.log(`Error: ${error}`)
+
+//     return {
+//         message: "oopsie"
+//     }
+// }

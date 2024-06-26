@@ -113,21 +113,21 @@ func VerifyRefreshToken(tokenString string) error {
 	return nil
 }
 
-func GetClaimsFromToken(tokenString string) (Claims, error) {
+func GetClaimsFromToken(tokenString string) (*Claims, error) {
 	claims := Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, &claims, func(t *jwt.Token) (interface{}, error) {
 		return accessSecret, nil
 	})
 	if err != nil {
-		return Claims{}, err
+		return nil, err
 	}
 
 	err = isTokenValid(token)
 	if err != nil {
-		return Claims{}, err
+		return nil, err
 	}
 
-	return claims, nil
+	return &claims, nil
 }
 
 func RefreshAccess(refresh string) (string, error) {
