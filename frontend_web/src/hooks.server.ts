@@ -1,5 +1,6 @@
+import { goto } from "$app/navigation";
 import { getSessionDataFromToken } from "$lib/util/tokenValidation.server";
-import { error, type Handle, type HandleFetch, type HandleServerError } from "@sveltejs/kit";
+import { error, redirect, type Handle, type HandleFetch, type HandleServerError } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
     const accessCookie = event.cookies.get("accesstoken");
@@ -26,7 +27,10 @@ export const handle: Handle = async ({ event, resolve }) => {
                     }
                 })
                 if (!res.ok) {
+                    event.cookies.delete("refreshtoken", {path: "/"})
+                    event.cookies.delete("accesstoken", {path: "/"})
                     throw Error("unable to refresh")
+                    
                 }
                 
                 var newAccess = res.headers.get("accesstoken")
@@ -39,7 +43,8 @@ export const handle: Handle = async ({ event, resolve }) => {
                 }
                 
             } catch (err) {
-                // console.log(err)
+                console.log(err)
+                throw redirect(302, "/login")
             }
         }
     }

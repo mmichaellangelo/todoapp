@@ -9,6 +9,7 @@
     export let data
 
     let awaitingResponse = false;
+    
     let loginError = {
         error: false,
         type: "",
@@ -50,8 +51,8 @@
             <input type="password" name="password" required>
         </label>
         <div id="login_create_container">
+            <a href="/create-account">Create an Account</a>
             <button type="submit">Log In</button>
-            <span>or <a href="/create-account">Create an Account</a></span>
         </div>
     </form>
 </div>
@@ -72,6 +73,10 @@
     #login_container {
         display: flex;
         flex-direction: column;
+    }
+
+    #login_create_container a {
+        margin-right: 1rem;
     }
 
     form {

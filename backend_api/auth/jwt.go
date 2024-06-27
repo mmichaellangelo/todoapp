@@ -10,7 +10,7 @@ import (
 var accessSecret = []byte("secret key")
 var refreshSecret = []byte("secret key")
 var accessTokenExpiration = (time.Second * 10)
-var refreshTokenExpiration = (time.Hour * 24)
+var refreshTokenExpiration = (time.Second * 30)
 
 type Claims struct {
 	Username string `json:"username"`
