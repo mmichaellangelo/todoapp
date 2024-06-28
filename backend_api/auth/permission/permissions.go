@@ -18,6 +18,26 @@ func NewPermissionHandler(db *db.DBPool) *PermissionHandler {
 	return &PermissionHandler{db: db}
 }
 
+func (h *PermissionHandler) GetPermissions(permissions_id int64) ([]int64, error) {
+	rows, err := h.db.Pool.Query(context.Background(),
+		`SELECT account_id FROM permissions_members
+		WHERE permissions_id=$1`, permissions_id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		err := rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, nil
+}
 func (h *PermissionHandler) CreatePermission(name string) (Permission, error) {
 	rows, err := h.db.Pool.Query(context.Background(),
 		`INSERT INTO permissions (name)

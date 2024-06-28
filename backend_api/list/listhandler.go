@@ -9,6 +9,7 @@ import (
 	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/auth/permission"
 	"mykale/todobackendapi/db"
+	"mykale/todobackendapi/functions"
 	"mykale/todobackendapi/todo"
 	"net/http"
 	"regexp"
@@ -111,11 +112,19 @@ func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(500)
 			w.Write([]byte("error getting list"))
 		}
-		// -------------- TODO :: Check Permissions!!
-		// right now only allow access to owner
+		// Check permissions
 		if acc_id != list.Account_ID {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("unauthorized"))
+			ids, err := h.permissionhandler.GetPermissions(list.Permissions_ID)
+			if err != nil {
+				http.Error(w, "error getting permissions", http.StatusUnauthorized)
+			}
+			if functions.Contains(ids, acc_id) {
+
+			} else {
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte("unauthorized"))
+			}
+
 		}
 
 		listJ, err := json.Marshal(list)

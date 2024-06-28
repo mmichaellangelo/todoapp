@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"mykale/todobackendapi/account"
+	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/db"
 	"net/http"
 	"regexp"
+	"strconv"
 	"time"
 )
 
@@ -28,7 +30,7 @@ type Todo struct {
 
 var (
 	TodoRE       = regexp.MustCompile(`^\/todos\/$`)
-	TodoREWithID = regexp.MustCompile(`^\/todos\/id\/[0-9]+$`)
+	TodoREWithID = regexp.MustCompile(`^\/todos\/([0-9]+)$`)
 )
 
 func NewTodoHandler(db *db.DBPool, accounthandler *account.AccountHandler) *TodoHandler {
@@ -36,12 +38,34 @@ func NewTodoHandler(db *db.DBPool, accounthandler *account.AccountHandler) *Todo
 }
 
 func (h *TodoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	claims, hasClaims := r.Context().Value("claims").(*auth.Claims)
 	switch {
 	// Get all
 	case r.Method == http.MethodGet && TodoRE.MatchString(r.URL.Path):
 
 	// Get by Todo ID
 	case r.Method == http.MethodGet && TodoREWithID.MatchString(r.URL.Path):
+		if !hasClaims {
+			http.Error(w, "no access token", http.StatusUnauthorized)
+			return
+		}
+		groups := TodoREWithID.FindStringSubmatch(r.URL.Path)
+		if len(groups) != 2 {
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+		todo_id, err := strconv.ParseInt(groups[1], 10, 64)
+		if err != nil {
+			http.Error(w, "invalid id format", http.StatusBadRequest)
+			return
+		}
+		t, err := h.GetByID(todo_id)
+		if err != nil {
+			http.Error(w, "error getting todo", http.StatusNotFound)
+		}
+		if !(claims.UserID == t.Account_ID) {
+			//get permissions!! >> go from there
+		}
 	// Create
 	case r.Method == http.MethodPost && TodoRE.MatchString(r.URL.Path):
 
@@ -176,4 +200,96 @@ func (h *TodoHandler) GetAllByEmail(email string) ([]Todo, error) {
 		return nil, err
 	}
 	return todos, nil
+}
+
+// UPDATE
+func (h *TodoHandler) UpdateCompleted(todo_id int64, completed bool) (Todo, error) {
+	rows, err := h.db.Pool.Query(context.Background(),
+		`UPDATE todos
+		SET completed=$1
+		WHERE id=$2
+		RETURNING id, body, list_id, completed, 
+		account_id, date_created, date_edited, 
+		permissions_id`, completed, todo_id)
+	if err != nil {
+		return Todo{}, err
+	}
+	defer rows.Close()
+	rows.Next()
+	var t Todo
+	err = rows.Scan(&t.ID, &t.Body, &t.List_ID,
+		&t.Completed, &t.Account_ID, &t.Date_Created,
+		&t.Date_Edited, &t.Permissions_ID)
+	if err != nil {
+		return Todo{}, err
+	}
+	return t, nil
+}
+
+func (h *TodoHandler) UpdateBody(todo_id int64, body string) (Todo, error) {
+	rows, err := h.db.Pool.Query(context.Background(),
+		`UPDATE todos
+		SET body=$1
+		WHERE id=$2
+		RETURNING id, body, list_id, completed, 
+		account_id, date_created, date_edited, 
+		permissions_id`, body, todo_id)
+	if err != nil {
+		return Todo{}, err
+	}
+	defer rows.Close()
+	rows.Next()
+	var t Todo
+	err = rows.Scan(&t.ID, &t.Body, &t.List_ID,
+		&t.Completed, &t.Account_ID, &t.Date_Created,
+		&t.Date_Edited, &t.Permissions_ID)
+	if err != nil {
+		return Todo{}, err
+	}
+	return t, nil
+}
+
+func (h *TodoHandler) UpdateListID(todo_id int64, list_id int64) (Todo, error) {
+	rows, err := h.db.Pool.Query(context.Background(),
+		`UPDATE todos
+		SET list_id=$1
+		WHERE id=$2
+		RETURNING id, body, list_id, completed, 
+		account_id, date_created, date_edited, 
+		permissions_id`, list_id, todo_id)
+	if err != nil {
+		return Todo{}, err
+	}
+	defer rows.Close()
+	rows.Next()
+	var t Todo
+	err = rows.Scan(&t.ID, &t.Body, &t.List_ID,
+		&t.Completed, &t.Account_ID, &t.Date_Created,
+		&t.Date_Edited, &t.Permissions_ID)
+	if err != nil {
+		return Todo{}, err
+	}
+	return t, nil
+}
+
+// DELETE
+func (h *TodoHandler) Delete(todo_id int64) (*Todo, error) {
+	rows, err := h.db.Pool.Query(context.Background(),
+		`DELETE FROM todos
+		WHERE id=$1
+		RETURNING id, body, list_id, completed, 
+		account_id, date_created, date_edited, 
+		permissions_id `, todo_id)
+	if err != nil {
+		return nil, err
+	}
+	rows.Next()
+	var t Todo
+	err = rows.Scan(&t.ID, &t.Body, &t.List_ID,
+		&t.Completed, &t.Account_ID, &t.Date_Created,
+		&t.Date_Edited, &t.Permissions_ID)
+	if err != nil {
+		return nil, err
+	}
+	return &t, nil
 }
