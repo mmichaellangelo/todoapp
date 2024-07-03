@@ -65,8 +65,8 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
     return fetch(request)
 }
 
-// export const handleError: HandleServerError = async ({error, event, status, message}) => {
-//     console.log(`Error: ${error}`)
+// export const handleError: HandleServerError = async ({event}) => {
+//     event.request.text()
 
 //     return {
 //         message: "oopsie"

@@ -37,7 +37,7 @@ CREATE TABLE todos (
     account_id INT REFERENCES accounts(id) ON DELETE CASCADE,
     date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     date_edited TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    permissions_id INT REFERENCES permissions(id)
+    permissions_id INT REFERENCES permissions(id) ON DELETE CASCADE
 );
 
 CREATE TABLE notes (

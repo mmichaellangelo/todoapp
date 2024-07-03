@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { setContext } from "svelte";
     import Header from "$lib/elements/Header/Header.svelte";
     import "./global.css"
     import { Session } from "$lib/state/userstore";
@@ -11,9 +10,12 @@
 
 </script>
 <Header/>
+
 <div>
     <slot/>
 </div>
+
+
 
 
 <style>

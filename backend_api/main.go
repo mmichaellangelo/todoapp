@@ -37,7 +37,10 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/login/", loginhandler)
 	mux.Handle("/logout/", loginhandler)
+	// combined handler delegates acccounts/, accounts/[id]/{resource} to respective handlers
 	mux.Handle("/accounts/", combinedhandler)
+	mux.Handle("/todos/", todohandler)
+	mux.Handle("/lists/", listhandler)
 
 	// Logger Middleware
 	LoggerMux := NewLoggerMiddleware(mux)

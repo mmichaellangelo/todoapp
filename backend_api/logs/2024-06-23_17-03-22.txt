@@ -1,3 +1,0 @@
-2024-06-23T17:03:44Z POST /login/refresh/
-2024-06-23T17:03:53Z POST /login/
-2024-06-23T17:03:55Z GET /accounts/1/lists/

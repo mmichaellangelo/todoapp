@@ -2,8 +2,7 @@
 
     import { enhance } from "$app/forms";
     import { goto } from "$app/navigation";
-    import { Session } from "$lib/state/userstore";
-    import { error, type SubmitFunction } from '@sveltejs/kit';
+    import type {SubmitFunction} from '@sveltejs/kit';
 
     let awaitingResponse = false;
     let errorMessage = "";
@@ -18,9 +17,8 @@
             if (result.type == "success") {
                 if (result.data?.success) {
                     success = true;
-                    Session.set({username: result.data.username, userid: result.data.userid})
                     setTimeout(() => {
-                        goto("/dashboard")
+                        goto("/login")
                     }, 1000)
                 }
                 if (!result.data?.success) {
@@ -34,7 +32,7 @@
 
 <div id="createaccount_container">
     <h2>Create Account</h2>
-    <form method="POST" use:enhance={handleEnhance}>
+    <form method="POST" action="/accounts/?/create"use:enhance={handleEnhance}>
         <label>
             Email:
             <input type="text" name="email">

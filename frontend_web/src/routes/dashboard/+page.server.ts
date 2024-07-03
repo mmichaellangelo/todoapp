@@ -1,10 +1,8 @@
 import type { iList } from "$lib/types";
-import { error, redirect } from "@sveltejs/kit";
-import type { LayoutServerLoad } from "./$types";
-import { goto } from "$app/navigation";
+import { error, redirect, type Actions } from "@sveltejs/kit";
+import type { PageServerLoad } from "./$types";
 
-export const load: LayoutServerLoad = async ({ fetch, locals }) => {
-   console.log("Layout server load!")
+export const load: PageServerLoad = async ({ fetch, locals }) => {
       const res = await fetch(`http://api/accounts/${locals.userid}/lists/`)
       if (!res.ok) {
          if (res.status == 303) {
@@ -15,7 +13,6 @@ export const load: LayoutServerLoad = async ({ fetch, locals }) => {
       }
       try {
          const resJ = await res.json()
-         console.log(resJ)
          const lists: iList[] = resJ as iList[];
          return { success: true, lists: lists }
       } catch (error) {
@@ -23,3 +20,5 @@ export const load: LayoutServerLoad = async ({ fetch, locals }) => {
          return { success: false }
    }
 }
+
+      

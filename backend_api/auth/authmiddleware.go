@@ -26,22 +26,20 @@ func (h *AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Restricted Path
 	case RestrictedPathRE.MatchString(path):
 		accesstoken := r.Header.Get("accesstoken")
-		if accesstoken == "" {
-			http.Error(w, "missing access token", http.StatusUnauthorized)
-			return
+		fmt.Println(accesstoken)
+		if accesstoken == "undefined" || accesstoken == "" {
+			fmt.Println("no access token provided")
+		} else {
+			claims, err := GetClaimsFromToken(accesstoken)
+			if err != nil {
+				fmt.Printf("error getting claims: %v", err)
+			}
+
+			fmt.Printf("CLAIMS: Username: %v, UserID: %d\n", claims.Username, claims.UserID)
+			// add claims to context
+			ctx := context.WithValue(r.Context(), "claims", claims)
+			r = r.WithContext(ctx)
 		}
-
-		claims, err := GetClaimsFromToken(accesstoken)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("invalid token: %v", err), http.StatusBadRequest)
-			return
-		}
-
-		fmt.Printf("CLAIMS: Username: %v, UserID: %d\n", claims.Username, claims.UserID)
-
-		// add claims to context
-		ctx := context.WithValue(r.Context(), "claims", claims)
-		r = r.WithContext(ctx)
 	}
 	h.next.ServeHTTP(w, r)
 }

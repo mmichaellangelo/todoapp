@@ -3,6 +3,7 @@ package todo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"mykale/todobackendapi/account"
 	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/db"
@@ -29,8 +30,8 @@ type Todo struct {
 }
 
 var (
-	TodoRE       = regexp.MustCompile(`^\/todos\/$`)
-	TodoREWithID = regexp.MustCompile(`^\/todos\/([0-9]+)$`)
+	TodoRE       = regexp.MustCompile(`^\/accounts\/(\d+)\/todos\/?$`)
+	TodoREWithID = regexp.MustCompile(`^\/todos\/(\d+)\/?$`)
 )
 
 func NewTodoHandler(db *db.DBPool, accounthandler *account.AccountHandler) *TodoHandler {
@@ -38,8 +39,10 @@ func NewTodoHandler(db *db.DBPool, accounthandler *account.AccountHandler) *Todo
 }
 
 func (h *TodoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// get claims
 	claims, hasClaims := r.Context().Value("claims").(*auth.Claims)
 	switch {
+	// ------------------------------TODO: Need routes for get all todos by account AND all todos by list
 	// Get all
 	case r.Method == http.MethodGet && TodoRE.MatchString(r.URL.Path):
 
@@ -72,6 +75,35 @@ func (h *TodoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	default:
 		return
 	}
+}
+
+// HELPERS
+func getAccountIDFromURL(url string) (int64, error) {
+	groups := TodoRE.FindStringSubmatch(url)
+	if len(groups) != 2 {
+		return -1, fmt.Errorf("invalid request")
+	}
+
+	acc_id, err := strconv.ParseInt(groups[1], 10, 64)
+	if err != nil {
+		return -1, fmt.Errorf("invalid account id")
+	}
+
+	return acc_id, nil
+}
+
+func getTodoIDFromURL(url string) (int64, error) {
+	groups := TodoREWithID.FindStringSubmatch(url)
+	if len(groups) != 2 {
+		return -1, fmt.Errorf("invalid request")
+	}
+
+	acc_id, err := strconv.ParseInt(groups[1], 10, 64)
+	if err != nil {
+		return -1, fmt.Errorf("invalid account id")
+	}
+
+	return acc_id, nil
 }
 
 // CREATE

@@ -1,7 +1,12 @@
 <script lang="ts">
-    import List from "$lib/elements/List/List.svelte";
+    import ListExplorer from "$lib/elements/ListExplorer/ListExplorer.svelte";
     export let data;
+    import List from "$lib/elements/List/List.svelte";
 </script>
+<title>Todo Overview</title>
+<h2>Dashboard</h2>
+
+<ListExplorer data={data.lists} />
 
 
 <h3>Lists</h3>

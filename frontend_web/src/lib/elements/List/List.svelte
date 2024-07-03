@@ -19,15 +19,18 @@
 
 {#if data}
     <div class="list_container">
-        <input type="text" name="title" class="title_input" bind:value={data.title} on:blur={handleUpdateTitle} placeholder="Title">
-        <p>{data.description || "description"}</p>
-        {#if data.todos}
-            {#each data.todos as todo}
-                <ToDoItem data={todo}/>
-            {/each}
-        {/if}
-        <input type="text" placeholder="Add Todo"/>
-        <button>Add Todo</button>
+        <form method="POST">
+            <input type="text" name="title" class="title_input" bind:value={data.title} on:blur={handleUpdateTitle} placeholder="Title">
+            <button class="delete_button" formaction={`/accounts/${data.account_id}/lists/${data.id}?/delete`} type="submit">Delete</button>
+            <p>{data.description || "description"}</p>
+            {#if data.todos}
+                {#each data.todos as todo}
+                    <ToDoItem data={todo}/>
+                {/each}
+            {/if}
+            <input type="text" placeholder="Add Todo"/>
+            <button type="submit" formaction="?/add">Add Todo</button>
+        </form>
     </div>
 {/if}
 
@@ -41,6 +44,7 @@
 
     .title_input {
         font-size: medium;
+        margin-right: 2rem;
     }
 
     p {
@@ -50,6 +54,9 @@
         text-indent: 0.5rem;
     }
 
+    .delete_button {
+        
+    }
     
 
 </style>

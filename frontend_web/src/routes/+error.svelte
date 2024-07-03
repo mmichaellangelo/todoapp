@@ -9,7 +9,7 @@
     onMount(() => {
         const images = ["fail1.gif", "fail2.gif", "fail3.gif"]
         const errormessages = ["oops", "aw shucks", "aaaaaaa", "oh no", "scheisse"]
-        imgsrc = images[Math.floor(Math.random()*images.length)]
+        imgsrc = "/" + images[Math.floor(Math.random()*images.length)]
         errormessage = errormessages[Math.floor(Math.random()*errormessages.length)]
     })
 
