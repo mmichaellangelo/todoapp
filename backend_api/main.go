@@ -7,7 +7,6 @@ import (
 	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/auth/login"
 	"mykale/todobackendapi/auth/permission"
-	"mykale/todobackendapi/combined"
 	"mykale/todobackendapi/db"
 	"mykale/todobackendapi/list"
 	"mykale/todobackendapi/todo"
@@ -31,14 +30,13 @@ func main() {
 	loginhandler := login.NewLoginHandler(pool, authhandler, accounthandler)
 
 	// Combined handler delegates routes from /account/* to respective handlers
-	combinedhandler := combined.NewCombinedHandler(accounthandler, listhandler, todohandler)
+	// combinedhandler := combined.NewCombinedHandler(accounthandler, listhandler, todohandler)
 
 	// Initialize routes
 	mux := http.NewServeMux()
 	mux.Handle("/login/", loginhandler)
 	mux.Handle("/logout/", loginhandler)
-	// combined handler delegates acccounts/, accounts/[id]/{resource} to respective handlers
-	mux.Handle("/accounts/", combinedhandler)
+	mux.Handle("/accounts/", accounthandler)
 	mux.Handle("/todos/", todohandler)
 	mux.Handle("/lists/", listhandler)
 

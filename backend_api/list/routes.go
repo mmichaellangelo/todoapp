@@ -1,5 +1,12 @@
 package list
 
+import (
+	"encoding/json"
+	"fmt"
+	"mykale/todobackendapi/auth"
+	"net/http"
+)
+
 func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	claims, hasClaims := r.Context().Value("claims").(*auth.Claims)
@@ -91,7 +98,7 @@ func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// query db for list
-		list, err := h.GetByListID(list_id)
+		list, err := h.GetByID(list_id)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("error getting list: %v", err), http.StatusNotFound)
 			return
@@ -131,7 +138,7 @@ func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// get list
-		list, err := h.GetByListID(list_id)
+		list, err := h.GetByID(list_id)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("error getting list: %v", err), http.StatusNotFound)
 		}
@@ -161,7 +168,7 @@ func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = h.UpdateList(list_id, newtitle, newdescription)
+		err = h.UpdateTitleAndDescription(list_id, newtitle, newdescription)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("error updating list: %v", err), http.StatusInternalServerError)
 			return
@@ -182,7 +189,7 @@ func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		list, err := h.GetByListID(list_id)
+		list, err := h.GetByID(list_id)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("couldn't find list: %v", err), http.StatusNotFound)
 		}

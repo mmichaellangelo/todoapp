@@ -1,5 +1,11 @@
 package todo
 
+import (
+	"context"
+	"fmt"
+	"strconv"
+)
+
 // HELPERS
 func getAccountIDFromURL(url string) (int64, error) {
 	groups := TodoRE.FindStringSubmatch(url)
@@ -51,6 +57,7 @@ func (h *TodoHandler) Create(body string, list_id int64, account_id int64) (Todo
 }
 
 // READ
+// -- TODO: require api key
 func (h *TodoHandler) GetAll() ([]Todo, error) {
 	rows, err := h.db.Pool.Query(context.Background(), `SELECT id, body, list_id, completed, 
 														account_id, date_created, date_edited, permissions_id 

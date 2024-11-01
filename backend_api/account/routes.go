@@ -1,5 +1,14 @@
 package account
 
+import (
+	"encoding/json"
+	"fmt"
+	"mykale/todobackendapi/auth"
+	"net/http"
+	"net/mail"
+	"strconv"
+)
+
 // ROUTES
 func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")

@@ -1,5 +1,11 @@
 package todo
 
+import (
+	"mykale/todobackendapi/auth"
+	"net/http"
+	"strconv"
+)
+
 func (h *TodoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// get claims
 	claims, hasClaims := r.Context().Value("claims").(*auth.Claims)
@@ -7,6 +13,12 @@ func (h *TodoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// ------------------------------TODO: Need routes for get all todos by account AND all todos by list
 	// Get all
 	case r.Method == http.MethodGet && TodoRE.MatchString(r.URL.Path):
+		if !hasClaims {
+			http.Error(w, "no access token", http.StatusUnauthorized)
+			return
+		}
+
+		return
 
 	// Get by Todo ID
 	case r.Method == http.MethodGet && TodoREWithID.MatchString(r.URL.Path):

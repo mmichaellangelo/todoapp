@@ -1,19 +1,11 @@
 package list
 
 import (
-	"context"
-	"database/sql"
-	"encoding/json"
-	"fmt"
 	"mykale/todobackendapi/account"
-	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/auth/permission"
 	"mykale/todobackendapi/db"
-	"mykale/todobackendapi/functions"
 	"mykale/todobackendapi/todo"
-	"net/http"
 	"regexp"
-	"strconv"
 	"time"
 )
 
@@ -57,6 +49,3 @@ var (
 func NewListHandler(db *db.DBPool, accounthandler *account.AccountHandler, todohandler *todo.TodoHandler, permissionhandler *permission.PermissionHandler) *ListHandler {
 	return &ListHandler{db: db, accounthandler: accounthandler, todohandler: todohandler, permissionhandler: permissionhandler}
 }
-
-
-

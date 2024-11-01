@@ -1,15 +1,10 @@
 package todo
 
 import (
-	"context"
 	"database/sql"
-	"fmt"
 	"mykale/todobackendapi/account"
-	"mykale/todobackendapi/auth"
 	"mykale/todobackendapi/db"
-	"net/http"
 	"regexp"
-	"strconv"
 	"time"
 )
 
@@ -30,13 +25,11 @@ type Todo struct {
 }
 
 var (
-	TodoRE       = regexp.MustCompile(`^\/accounts\/(\d+)\/todos\/?$`)
-	TodoREWithID = regexp.MustCompile(`^\/todos\/(\d+)\/?$`)
+	TodoRE           = regexp.MustCompile(`^\/accounts\/(\d+)\/todos\/?$`)
+	TodoREWithID     = regexp.MustCompile(`^\/todos\/(\d+)\/?$`)
+	TodoREWithListID = regexp.MustCompile(`^\/accounts\/\d+\/lists\/\d+\/todos\/?$`)
 )
 
 func NewTodoHandler(db *db.DBPool, accounthandler *account.AccountHandler) *TodoHandler {
 	return &TodoHandler{db: db, accounthandler: accounthandler}
 }
-
-
-

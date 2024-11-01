@@ -12,8 +12,8 @@ type CombinedHandler struct {
 }
 
 var (
-	ListRE    = regexp.MustCompile(`^\/accounts\/\d+\/lists\/?(\d+\/?)?$`)
-	TodoRE    = regexp.MustCompile(`^\/accounts\/\d+\/lists\/\d+\/todos\/?(\d+\/?)?$`)
+	ListRE    = regexp.MustCompile(`^\/accounts\/\d+\/lists\/?$`)
+	TodoRE    = regexp.MustCompile(`^\/accounts\/\d+\/todos\/?$`)
 	AccountRE = regexp.MustCompile(`^\/accounts\/?(\d+\/?)?$`)
 )
 

@@ -1,16 +1,8 @@
 package account
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"mykale/todobackendapi/auth"
-	"mykale/todobackendapi/auth/password"
 	"mykale/todobackendapi/db"
-	"net/http"
-	"net/mail"
 	"regexp"
-	"strconv"
 	"time"
 )
 
@@ -30,6 +22,12 @@ type AccountHandler struct {
 var (
 	AccountRE       = regexp.MustCompile(`^\/accounts\/$`)
 	AccountREWithID = regexp.MustCompile(`^\/accounts\/(\d+)\/?$`)
+
+	ListRE       = regexp.MustCompile(`^\/accounts\/lists\/?`)
+	ListREWithID = regexp.MustCompile(`^\/accounts\/lists\/(\d+)\/?`)
+
+	TodoRE       = regexp.MustCompile(`^\/accounts\/todos\/?`)
+	TodoREWithID = regexp.MustCompile(`^\/accounts\/todos\/(\d+)\/?`)
 )
 
 func NewAccountHandler(db *db.DBPool) *AccountHandler {
